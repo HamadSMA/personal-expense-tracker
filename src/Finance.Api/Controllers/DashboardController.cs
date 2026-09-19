@@ -1,7 +1,7 @@
 using Finance.Application.Common;
 using Finance.Application.Dashboard;
-using Finance.Domain;
 using Finance.Domain.Entities;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 
@@ -10,12 +10,13 @@ namespace Finance.Api.Controllers;
 public record DashboardQuery(DateOnly? From, DateOnly? To);
 
 [ApiController]
+[Authorize]
 [Route("api/dashboard")]
 public class DashboardController(IFinanceDbContext db) : ControllerBase
 {
-    private IQueryable<Expense> ScopedExpenses(DashboardQuery query)
+    private IQueryable<Expense> ScopedExpenses(DashboardQuery query, Guid userId)
     {
-        var expenses = db.Expenses.AsNoTracking().Where(e => e.UserId == DevUser.Id);
+        var expenses = db.Expenses.AsNoTracking().Where(e => e.UserId == userId);
 
         if (query.From is DateOnly from)
             expenses = expenses.Where(e => e.ExpenseDate >= from);
@@ -29,7 +30,9 @@ public class DashboardController(IFinanceDbContext db) : ControllerBase
     [HttpGet("summary")]
     public async Task<IActionResult> Summary([FromQuery] DashboardQuery query, CancellationToken ct)
     {
-        var stats = await ScopedExpenses(query)
+        var userId = await User.ResolveUserIdAsync(db, ct);
+
+        var stats = await ScopedExpenses(query, userId)
             .GroupBy(e => 1)
             .Select(g => new
             {
@@ -53,7 +56,9 @@ public class DashboardController(IFinanceDbContext db) : ControllerBase
         CancellationToken ct
     )
     {
-        var groups = await ScopedExpenses(query)
+        var userId = await User.ResolveUserIdAsync(db, ct);
+
+        var groups = await ScopedExpenses(query, userId)
             .GroupBy(e => e.CategoryId)
             .Select(g => new { CategoryId = g.Key, Amount = g.Sum(e => e.Amount) })
             .ToListAsync(ct);
@@ -75,7 +80,9 @@ public class DashboardController(IFinanceDbContext db) : ControllerBase
     [HttpGet("by-day")]
     public async Task<IActionResult> ByDay([FromQuery] DashboardQuery query, CancellationToken ct)
     {
-        var daily = await ScopedExpenses(query)
+        var userId = await User.ResolveUserIdAsync(db, ct);
+
+        var daily = await ScopedExpenses(query, userId)
             .GroupBy(e => e.ExpenseDate)
             .Select(g => new DailySpending(g.Key, g.Sum(e => e.Amount)))
             .ToListAsync(ct);
@@ -110,7 +117,9 @@ public class DashboardController(IFinanceDbContext db) : ControllerBase
         CancellationToken ct
     )
     {
-        var top = await ScopedExpenses(query)
+        var userId = await User.ResolveUserIdAsync(db, ct);
+
+        var top = await ScopedExpenses(query, userId)
             .OrderByDescending(e => e.Amount)
             .Take(10)
             .Select(e => new TopExpense(
