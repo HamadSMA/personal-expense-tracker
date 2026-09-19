@@ -1,7 +1,7 @@
 using Finance.Application.Common;
 using Finance.Application.Expenses;
-using Finance.Domain;
 using Finance.Domain.Entities;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 
@@ -21,13 +21,16 @@ public record ExpenseQuery(
 );
 
 [ApiController]
+[Authorize]
 [Route("api/expenses")]
 public class ExpensesController(IFinanceDbContext db) : ControllerBase
 {
     [HttpGet]
     public async Task<IActionResult> GetAll([FromQuery] ExpenseQuery query, CancellationToken ct)
     {
-        var expenses = db.Expenses.AsNoTracking().Where(e => e.UserId == DevUser.Id);
+        var userId = await User.ResolveUserIdAsync(db, ct);
+
+        var expenses = db.Expenses.AsNoTracking().Where(e => e.UserId == userId);
 
         if (query.CategoryId is int categoryId)
             expenses = expenses.Where(e => e.CategoryId == categoryId);
@@ -97,9 +100,11 @@ public class ExpensesController(IFinanceDbContext db) : ControllerBase
     [HttpGet("{id:guid}")]
     public async Task<IActionResult> GetById(Guid id, CancellationToken ct)
     {
+        var userId = await User.ResolveUserIdAsync(db, ct);
+
         var expense = await db
             .Expenses.AsNoTracking()
-            .Where(e => e.UserId == DevUser.Id && e.Id == id)
+            .Where(e => e.UserId == userId && e.Id == id)
             .Select(e => new ExpenseResponse(
                 e.Id,
                 e.CategoryId,
@@ -125,11 +130,13 @@ public class ExpensesController(IFinanceDbContext db) : ControllerBase
     [HttpPost]
     public async Task<IActionResult> Create(CreateExpenseRequest request, CancellationToken ct)
     {
+        var userId = await User.ResolveUserIdAsync(db, ct);
+
         var now = DateTime.UtcNow;
         var expense = new Expense
         {
             Id = Guid.NewGuid(),
-            UserId = DevUser.Id,
+            UserId = userId,
             CategoryId = request.CategoryId,
             Amount = request.Amount,
             Description = request.Description,
@@ -167,8 +174,10 @@ public class ExpensesController(IFinanceDbContext db) : ControllerBase
         CancellationToken ct
     )
     {
+        var userId = await User.ResolveUserIdAsync(db, ct);
+
         var expense = await db.Expenses.FirstOrDefaultAsync(
-            e => e.UserId == DevUser.Id && e.Id == id,
+            e => e.UserId == userId && e.Id == id,
             ct
         );
 
@@ -193,8 +202,10 @@ public class ExpensesController(IFinanceDbContext db) : ControllerBase
     [HttpDelete("{id:guid}")]
     public async Task<IActionResult> Delete(Guid id, CancellationToken ct)
     {
+        var userId = await User.ResolveUserIdAsync(db, ct);
+
         var expense = await db.Expenses.FirstOrDefaultAsync(
-            e => e.UserId == DevUser.Id && e.Id == id,
+            e => e.UserId == userId && e.Id == id,
             ct
         );
 
