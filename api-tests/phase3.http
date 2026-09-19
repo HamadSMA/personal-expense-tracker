@@ -1,4 +1,48 @@
-POST http://localhost:8080/realms/finance/protocol/openid-connect/token
+@host = http://localhost:5048
+@keycloak = http://localhost:8080
+@realm = finance
+
+### Get a token (captures access_token for the requests below)
+# @name login
+POST {{keycloak}}/realms/{{realm}}/protocol/openid-connect/token
 Content-Type: application/x-www-form-urlencoded
 
 grant_type=password&client_id=finance-web&username=testuser&password=password
+
+### Store the token
+@token = {{login.response.body.access_token}}
+
+### No token → 401
+GET {{host}}/api/expenses
+
+### With token → 200 (empty or your expenses)
+GET {{host}}/api/expenses
+Authorization: Bearer {{token}}
+
+### Create an expense (belongs to testuser) → 201
+# @name create
+POST {{host}}/api/expenses
+Authorization: Bearer {{token}}
+Content-Type: application/json
+
+{
+  "categoryId": 1,
+  "amount": 42.50,
+  "description": "Coffee",
+  "expenseDate": "2026-09-01"
+}
+
+### Get it back by id → 200
+GET {{host}}/api/expenses/{{create.response.body.id}}
+Authorization: Bearer {{token}}
+
+### Dashboard summary with token → 200
+GET {{host}}/api/dashboard/summary
+Authorization: Bearer {{token}}
+
+### Dashboard summary without token → 401
+GET {{host}}/api/dashboard/summary
+
+### Malformed token → 401
+GET {{host}}/api/expenses
+Authorization: Bearer not-a-real-token

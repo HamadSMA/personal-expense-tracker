@@ -16,6 +16,7 @@ builder
     {
         options.Authority = builder.Configuration["Jwt:Authority"];
         options.Audience = builder.Configuration["Jwt:Audience"];
+        options.RequireHttpsMetadata = false;
         options.MapInboundClaims = false;
         options.TokenValidationParameters = new TokenValidationParameters
         {

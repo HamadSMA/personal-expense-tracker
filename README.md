@@ -1,139 +1,128 @@
-# Finance: Personal Expense Tracker
+# Finance — Personal Expense Tracker
 
-A single-user expense tracker: log what you spent, categorise it, and see where the money went on a dashboard. Built as a portfolio project. The backend is an ASP.NET Core 10 API organised around Clean Architecture, backed by PostgreSQL. Amounts are in SAR; there is no multi-currency support and there are no accounts, budgets, or transfers. The domain is deliberately small so the engineering around it can be the interesting part.
+A multi-user expense tracker: log spending, categorise it, see where the money went.
+Portfolio project. ASP.NET Core 10 Web API, Clean Architecture, PostgreSQL, Keycloak for
+authentication. Amounts are in SAR; no multi-currency, accounts, budgets, or transfers —
+the domain is deliberately small so the engineering around it can be the interesting part.
 
-**Status: in active development.** Phase 1 (core backend) is complete and runnable. Phases 2 to 6 are in progress; see [Roadmap](#roadmap) for what is built and what is planned. Sections below describe only what is in the code today, and anything planned is labelled as such.
+**Status:** backend complete through Phase 3 (secured API). Frontend is next.
 
-## Screenshots
+| | |
+| --- | --- |
+| **Backend** | C#, .NET 10, ASP.NET Core Web API |
+| **Data** | PostgreSQL, EF Core 10 + Npgsql, code-first migrations |
+| **Auth** | Keycloak, OIDC / OAuth 2.0, JWT bearer validation |
+| **API** | REST, OpenAPI, RFC 7807 ProblemDetails |
+| **Architecture** | Clean Architecture, 4 projects |
+| **Frontend** | React + TypeScript *(Phase 4, not started)* |
 
-None yet. The frontend is a Phase 4 deliverable and has not been started, so there is no UI to show. The API can be exercised with `api-tests/phase1.http` or through the OpenAPI document; see [Running Locally](#running-locally).
+## Features
 
-## Tech Stack
+**Built:**
 
-Built and running:
+- Full expense CRUD — amount, description, date, category
+- **Per-user data isolation** — every query scoped to the JWT's user; no cross-user reads
+- **JWT bearer auth** — signature, issuer, audience and expiry validated against Keycloak's
+  discovery document; issuer configured, never hardcoded
+- **Filtering** — category, min/max amount, date range, description search
+- **Sorting** — date, amount, created-at; ascending or descending
+- **Pagination** — paged envelope with total count and page count
+- **Dashboard aggregation** — totals, spend by category with percentages, spend over time
+  with adaptive day/week/month bucketing, top expenses. All aggregated in SQL, not in memory
+- **Validation** — positive amounts, max 2 decimal places, no future dates, known category,
+  description length
+- **Consistent errors** — RFC 7807 ProblemDetails, no stack traces or database detail leaked
+- 9 seeded categories as read-only reference data
 
-- C#, .NET 10, ASP.NET Core Web API (controllers)
-- EF Core 10 with Npgsql, PostgreSQL, code-first migrations
-- OpenAPI via `Microsoft.AspNetCore.OpenApi`
-- RFC 7807 ProblemDetails for errors
+**Not built yet:** frontend, automated tests, Docker Compose, CI, health checks.
 
-Planned, not yet in the repository:
+## API
 
-- Request validation with DataAnnotations (Phase 2)
-- Keycloak for OIDC / OAuth 2.0 / JWT bearer auth (Phase 3)
-- React, TypeScript, Vite (Phase 4)
-- xUnit and Testcontainers (Phase 5)
-- Docker, Docker Compose, GitHub Actions (Phase 6)
+All expense and dashboard endpoints require `Authorization: Bearer <token>`.
+
+| Method | Route | Description |
+| --- | --- | --- |
+| GET | `/api/expenses` | List — filtered, sorted, paged |
+| GET | `/api/expenses/{id}` | Fetch one |
+| POST | `/api/expenses` | Create |
+| PUT | `/api/expenses/{id}` | Update |
+| DELETE | `/api/expenses/{id}` | Delete |
+| GET | `/api/dashboard/summary` | Total, count, average, largest |
+| GET | `/api/dashboard/by-category` | Spend per category, with % of total |
+| GET | `/api/dashboard/by-day` | Spend over time, auto-bucketed |
+| GET | `/api/dashboard/top-expenses` | 10 largest |
+| GET | `/api/categories` | The 9 fixed categories *(anonymous)* |
+
+Query parameters on `/api/expenses`: `categoryId`, `minAmount`, `maxAmount`, `fromDate`,
+`toDate`, `search`, `sortBy`, `sortDirection`, `page`, `pageSize`.
+
+Status codes: `200` / `201` / `204` on success, `400` validation, `401` missing or invalid
+token, `404` not found or not yours.
+
+## Architecture
+
+```text
+API            → Application, Infra       controllers, auth, composition
+Infrastructure → Application + Domain     EF Core, Npgsql, migrations
+Application    → Domain                   DTOs, IFinanceDbContext
+Domain         → nothing                  entities, category list
+```
+
+The domain references no framework — no ASP.NET Core, no EF Core, no provider SDKs — so
+persistence and identity are swappable without touching business rules. Swapping Keycloak
+for Entra ID is a configuration change, not a code change.
 
 ## Running Locally
 
-Prerequisites: .NET SDK 10.0 and a PostgreSQL 14+ instance. Nothing else is needed yet; there is no frontend or Compose file to run.
-
-Clone, point the API at a database, apply migrations, and run:
+Prerequisites: .NET SDK 10, PostgreSQL 14+, Docker, and the EF Core CLI
+(`dotnet tool install --global dotnet-ef`).
 
 ```bash
-git clone https://github.com/<your-username>/finance.git
-cd finance
+git clone <repo-url> && cd personal-expense-tracker
 
-export ConnectionStrings__FinanceDb="Host=localhost;Port=5432;Database=finance;Username=postgres;Password=postgres"
+# 1. Identity provider
+docker run -d --name keycloak -p 8080:8080 \
+  -e KC_BOOTSTRAP_ADMIN_USERNAME=admin -e KC_BOOTSTRAP_ADMIN_PASSWORD=admin \
+  quay.io/keycloak/keycloak:26.7 start-dev
 
-dotnet restore
+# 2. Config — then edit ConnectionStrings:FinanceDb to match your PostgreSQL user
+cp src/Finance.Api/appsettings.Example.json src/Finance.Api/appsettings.json
+
+# 3. Database + run
 dotnet ef database update --project src/Finance.Infrastructure --startup-project src/Finance.Api
 dotnet run --project src/Finance.Api
 ```
 
-The API listens on http://localhost:5048. Adjust the connection string to match your PostgreSQL user, or create the database first with `createdb finance`.
+API on `http://localhost:5048`, Keycloak admin console on `http://localhost:8080`.
+`appsettings.json` is gitignored; `appsettings.Example.json` is the committed template.
 
-If you prefer a config file to an environment variable, copy the committed template instead of exporting the variable:
+In Keycloak (admin console → `admin` / `admin`), create:
 
-```bash
-cp src/Finance.Api/appsettings.Example.json src/Finance.Api/appsettings.json
-```
+- A realm named `finance`
+- A client `finance-api` — this is the API's audience, it logs nobody in
+- A public client `finance-web` with **Direct access grants** enabled, and an
+  **audience mapper** adding `finance-api` to the token's `aud`
+- A user with a password (**Temporary off**) and a complete profile — first name, last
+  name and email, or Keycloak's default *Verify Profile* action blocks token issuance
+  with `400 Account is not fully set up`
 
-Then edit the `ConnectionStrings:FinanceDb` value. `appsettings.json` is gitignored, so it stays local to you; `appsettings.Example.json` is committed so a fresh clone always has a starting point.
-
-`dotnet ef` is required for the migration step. If you do not have it: `dotnet tool install --global dotnet-ef`.
-
-Applying the migration creates the schema and seeds the nine fixed categories (Food, Transport, Housing, Shopping, Entertainment, Bills, Healthcare, Travel, Other).
-
-Once running:
-
-- `GET http://localhost:5048/api/categories` returns the nine seeded categories
-- `GET http://localhost:5048/openapi/v1.json` serves the OpenAPI document in Development
-- `api-tests/phase1.http` is a REST Client suite covering the expense and category endpoints end to end, with the expected status code noted next to each request
-
-These steps were verified from a clean state on .NET 10.0.103 against PostgreSQL 14 on 2026-09-08, with no `appsettings.json` present, using only the environment variable above. `dotnet build Finance.slnx` succeeds with no warnings.
-
-## Architecture
-
-Four projects under `src/`, following Clean Architecture. The domain holds entities and the fixed category list and references nothing: no ASP.NET Core, no EF Core, no provider SDKs. Application owns DTOs and the `IFinanceDbContext` abstraction; Infrastructure implements that abstraction with EF Core and Npgsql; the API layer holds controllers and composition. The point of the structure on a domain this small is that persistence and identity are swappable without touching business rules.
-
-```text
-API → Application
-Infrastructure → Application + Domain
-Application → Domain
-Domain → nothing
-```
-
-## Features
-
-Implemented today:
-
-- Create, read, update, and delete expenses, each with an amount, description, date, and category.
-- Read-only category listing over nine fixed categories, seeded by the initial migration. Categories are reference data and have no create, update, or delete endpoints by design.
-- RFC 7807 ProblemDetails responses, including a 404 body for a missing expense and a global handler for unhandled exceptions, with no stack traces or database detail leaked.
-- Database-level querying with EF Core projections, so list responses select only the response shape rather than loading full entities.
-- Schema managed by code-first migrations, with indexes on `UserId`, `ExpenseDate`, and the two combined.
-
-Not yet implemented. These are the next phases, listed so the gap is explicit:
-
-- Request validation. `POST /api/expenses` currently accepts a negative amount, an empty description, and a future date. DataAnnotations rules are planned for Phase 2.
-- Filtering, sorting, and pagination. `GET /api/expenses` returns every expense as a plain array; query parameters are ignored and there is no paged envelope. Planned for Phase 2.
-- Dashboard aggregation endpoints. Planned for Phase 2.
-- Authentication and per-user ownership. Queries are scoped to a hardcoded `DevUser.Id` constant in `Finance.Domain`, which is a development placeholder, not an auth model. Keycloak and JWT bearer validation are planned for Phase 3. **Do not deploy this as-is; there is no access control.**
-- Health checks, tests, Docker, and CI. Planned for Phases 5 and 6.
-
-## API Endpoints
-
-Implemented and verified against `src/Finance.Api/Controllers/`:
-
-| Method | Route | Description |
-| --- | --- | --- |
-| GET | `/api/expenses` | List all expenses, newest first. No filtering or paging yet. |
-| GET | `/api/expenses/{id}` | Fetch one expense; 404 as ProblemDetails if absent |
-| POST | `/api/expenses` | Create an expense; 201 with a Location header |
-| PUT | `/api/expenses/{id}` | Update an expense; 204 on success, 404 if absent |
-| DELETE | `/api/expenses/{id}` | Delete an expense; 204 on success, 404 if absent |
-| GET | `/api/categories` | List the nine fixed categories |
-
-Planned, and not currently routable:
-
-| Method | Route | Phase |
-| --- | --- | --- |
-| GET | `/api/dashboard/summary` | 2 |
-| GET | `/api/dashboard/by-category` | 2 |
-| GET | `/api/dashboard/by-day` | 2 |
-| GET | `/api/dashboard/top-expenses` | 2 |
-| GET | `/health` | 5 |
-
-## Testing
-
-There are no automated tests yet. `tests/` is an empty placeholder and the solution contains no test projects, so `dotnet test` would run nothing. Until Phase 5, the API is exercised manually through `api-tests/phase1.http`.
-
-Planned for Phase 5: xUnit unit tests for validation rules and dashboard calculations, and integration tests driving real HTTP requests through the API down to a PostgreSQL database via Testcontainers, so query, mapping, and migration behaviour is exercised rather than mocked.
+Migrations seed the 9 fixed categories. Exercise the API with the REST Client suites in `api-tests/` — `phase1.http` (CRUD),
+`phase2.http` (validation, filtering, paging), `phase3.http` (auth, including the token
+request). OpenAPI document at `/openapi/v1.json` in Development.
 
 ## Roadmap
 
-- [x] **Phase 1, Core Backend.** API, Clean Architecture, EF Core, PostgreSQL, expense CRUD, seeded categories, ProblemDetails.
-- [ ] **Phase 2, Real API.** DTO validation, filtering, sorting, pagination, dashboard aggregation endpoints.
-- [ ] **Phase 3, Security.** Keycloak, OIDC, OAuth 2.0, JWT bearer, policies, per-user ownership replacing `DevUser`.
-- [ ] **Phase 4, Frontend.** React, TypeScript, OIDC login, expense UI, dashboard, charts.
-- [ ] **Phase 5, Quality.** Unit and integration tests, PostgreSQL test database, structured logging, health checks.
-- [ ] **Phase 6, Infrastructure.** Dockerfiles, Docker Compose for API + PostgreSQL + Keycloak + frontend, GitHub Actions CI, container registry.
-- [ ] **Phase 7, Optional.** Azure Container Apps, Entra ID swap for Keycloak, Redis, OpenTelemetry, rate limiting.
+- [x] **Phase 1 — Core Backend.** Clean Architecture, EF Core, PostgreSQL, CRUD, ProblemDetails
+- [x] **Phase 2 — Real API.** Validation, filtering, sorting, pagination, dashboard aggregation
+- [x] **Phase 3 — Security.** Keycloak, OIDC, JWT bearer, per-user ownership
+- [ ] **Phase 4 — Frontend.** React, TypeScript, OIDC login, expense UI, charts
+- [ ] **Phase 5 — Quality.** xUnit, Testcontainers integration tests, structured logging, health checks
+- [ ] **Phase 6 — Infrastructure.** Dockerfiles, Compose for the full stack, GitHub Actions CI
+- [ ] **Phase 7 — Optional.** Azure Container Apps, Entra ID, Redis, OpenTelemetry, rate limiting
 
-Once Phase 6 lands, the intended entry point becomes a single `docker compose up` that brings up the API, PostgreSQL, Keycloak, and the frontend together, so the project is clone-and-run with no external tenant to configure. That file does not exist yet, so the backend steps above are the current path.
+Phase 6 makes `docker compose up` the single entry point for API, PostgreSQL, Keycloak and
+frontend.
 
 ## License
 
-See [LICENSE](LICENSE).
+MIT — see [LICENSE](LICENSE).
