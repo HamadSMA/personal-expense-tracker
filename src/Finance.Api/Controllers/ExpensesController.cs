@@ -7,6 +7,19 @@ using Microsoft.EntityFrameworkCore;
 
 namespace Finance.Api.Controllers;
 
+/// <summary>
+/// Query string options for listing expenses. Every option is optional.
+/// </summary>
+/// <param name="CategoryId">Only include expenses in this category.</param>
+/// <param name="MinAmount">Only include expenses with an amount of at least this value.</param>
+/// <param name="MaxAmount">Only include expenses with an amount of at most this value.</param>
+/// <param name="FromDate">Only include expenses on or after this date.</param>
+/// <param name="ToDate">Only include expenses on or before this date.</param>
+/// <param name="Search">Case-insensitive text to match anywhere in the description.</param>
+/// <param name="SortBy">Field to sort by: "amount", "createdAt" or "expenseDate". Defaults to "expenseDate".</param>
+/// <param name="SortDirection">"asc" or "desc". Defaults to "desc".</param>
+/// <param name="Page">1-based page number. Defaults to 1.</param>
+/// <param name="PageSize">Number of items per page. Defaults to 20, maximum 100.</param>
 public record ExpenseQuery(
     int? CategoryId,
     decimal? MinAmount,
@@ -20,11 +33,28 @@ public record ExpenseQuery(
     int? PageSize
 );
 
+/// <summary>
+/// Create, read, update and delete the current user's expenses.
+/// </summary>
+/// <param name="db">Database context used to query and save expenses.</param>
 [ApiController]
 [Authorize]
 [Route("api/expenses")]
 public class ExpensesController(IFinanceDbContext db) : ControllerBase
 {
+    /// <summary>
+    /// Lists the current user's expenses with filtering, sorting and paging.
+    /// </summary>
+    /// <remarks>
+    /// All filters are optional and combine with AND. Search is a case-insensitive match
+    /// on the description. SortBy accepts "amount", "createdAt" or "expenseDate" (the default),
+    /// and SortDirection accepts "asc" or "desc" (the default).
+    /// Page defaults to 1, and PageSize defaults to 20 with a maximum of 100.
+    /// </remarks>
+    /// <param name="query">Filter, sort and paging options.</param>
+    /// <param name="ct">Cancellation token for the request.</param>
+    /// <response code="200">A page of expenses along with paging metadata.</response>
+    /// <response code="401">The request has no valid bearer token.</response>
     [HttpGet]
     public async Task<IActionResult> GetAll([FromQuery] ExpenseQuery query, CancellationToken ct)
     {
@@ -97,6 +127,14 @@ public class ExpensesController(IFinanceDbContext db) : ControllerBase
         return Ok(new PagedResult<ExpenseResponse>(items, page, pageSize, totalCount, totalPages));
     }
 
+    /// <summary>
+    /// Gets a single expense by id.
+    /// </summary>
+    /// <param name="id">The expense id.</param>
+    /// <param name="ct">Cancellation token for the request.</param>
+    /// <response code="200">The requested expense.</response>
+    /// <response code="401">The request has no valid bearer token.</response>
+    /// <response code="404">No expense with this id exists for the current user.</response>
     [HttpGet("{id:guid}")]
     public async Task<IActionResult> GetById(Guid id, CancellationToken ct)
     {
@@ -127,6 +165,14 @@ public class ExpensesController(IFinanceDbContext db) : ControllerBase
         return Ok(expense);
     }
 
+    /// <summary>
+    /// Creates a new expense for the current user.
+    /// </summary>
+    /// <param name="request">The expense details.</param>
+    /// <param name="ct">Cancellation token for the request.</param>
+    /// <response code="201">The created expense, with its location in the Location header.</response>
+    /// <response code="400">The request body failed validation.</response>
+    /// <response code="401">The request has no valid bearer token.</response>
     [HttpPost]
     public async Task<IActionResult> Create(CreateExpenseRequest request, CancellationToken ct)
     {
@@ -167,6 +213,16 @@ public class ExpensesController(IFinanceDbContext db) : ControllerBase
         return CreatedAtAction(nameof(GetById), new { id = expense.Id }, response);
     }
 
+    /// <summary>
+    /// Replaces the details of an existing expense.
+    /// </summary>
+    /// <param name="id">The expense id.</param>
+    /// <param name="request">The new expense details.</param>
+    /// <param name="ct">Cancellation token for the request.</param>
+    /// <response code="204">The expense was updated.</response>
+    /// <response code="400">The request body failed validation.</response>
+    /// <response code="401">The request has no valid bearer token.</response>
+    /// <response code="404">No expense with this id exists for the current user.</response>
     [HttpPut("{id:guid}")]
     public async Task<IActionResult> Update(
         Guid id,
@@ -199,6 +255,14 @@ public class ExpensesController(IFinanceDbContext db) : ControllerBase
         return NoContent();
     }
 
+    /// <summary>
+    /// Deletes an expense.
+    /// </summary>
+    /// <param name="id">The expense id.</param>
+    /// <param name="ct">Cancellation token for the request.</param>
+    /// <response code="204">The expense was deleted.</response>
+    /// <response code="401">The request has no valid bearer token.</response>
+    /// <response code="404">No expense with this id exists for the current user.</response>
     [HttpDelete("{id:guid}")]
     public async Task<IActionResult> Delete(Guid id, CancellationToken ct)
     {

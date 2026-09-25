@@ -1,0 +1,848 @@
+{
+  "info": {
+    "_postman_id": "07940134-b73e-427d-88c8-8f3ea6dd8a6c",
+    "name": "Finance API",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+    "_exporter_id": "53539068"
+  },
+  "item": [
+    {
+      "name": "api",
+      "item": [
+        {
+          "name": "categories",
+          "item": [
+            {
+              "name": "Lists every expense category, ordered by id.",
+              "request": {
+                "method": "GET",
+                "header": [],
+                "url": {
+                  "raw": "{{baseUrl}}/api/categories",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "api",
+                    "categories"
+                  ]
+                },
+                "description": "Categories are shared across all users, so this endpoint does not require authentication."
+              },
+              "response": [
+                {
+                  "name": "The full list of categories.",
+                  "originalRequest": {
+                    "method": "GET",
+                    "header": [],
+                    "url": {
+                      "raw": "{{baseUrl}}/api/categories",
+                      "host": [
+                        "{{baseUrl}}"
+                      ],
+                      "path": [
+                        "api",
+                        "categories"
+                      ]
+                    }
+                  },
+                  "status": "OK",
+                  "code": 200,
+                  "_postman_previewlanguage": "text",
+                  "header": [],
+                  "cookie": [],
+                  "body": null
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "name": "dashboard",
+          "item": [
+            {
+              "name": "summary",
+              "item": [
+                {
+                  "name": "Returns headline totals for the current user's expenses.",
+                  "request": {
+                    "method": "GET",
+                    "header": [],
+                    "url": {
+                      "raw": "{{baseUrl}}/api/dashboard/summary?From=2017-01-25&To=2017-01-25",
+                      "host": [
+                        "{{baseUrl}}"
+                      ],
+                      "path": [
+                        "api",
+                        "dashboard",
+                        "summary"
+                      ],
+                      "query": [
+                        {
+                          "description": "Only include expenses on or after this date.",
+                          "key": "From",
+                          "value": "2017-01-25"
+                        },
+                        {
+                          "description": "Only include expenses on or before this date.",
+                          "key": "To",
+                          "value": "2017-01-25"
+                        }
+                      ]
+                    },
+                    "description": "Includes the total spent, number of expenses, average amount (rounded to 2 decimal places)\nand largest single expense. All values are 0 when no expenses match the date range."
+                  },
+                  "response": [
+                    {
+                      "name": "The spending summary for the date range.",
+                      "originalRequest": {
+                        "method": "GET",
+                        "header": [],
+                        "url": {
+                          "raw": "{{baseUrl}}/api/dashboard/summary?From=2017-01-25&To=2017-01-25",
+                          "host": [
+                            "{{baseUrl}}"
+                          ],
+                          "path": [
+                            "api",
+                            "dashboard",
+                            "summary"
+                          ],
+                          "query": [
+                            {
+                              "description": "Only include expenses on or after this date.",
+                              "key": "From",
+                              "value": "2017-01-25"
+                            },
+                            {
+                              "description": "Only include expenses on or before this date.",
+                              "key": "To",
+                              "value": "2017-01-25"
+                            }
+                          ]
+                        }
+                      },
+                      "status": "OK",
+                      "code": 200,
+                      "_postman_previewlanguage": "text",
+                      "header": [],
+                      "cookie": [],
+                      "body": null
+                    }
+                  ]
+                }
+              ]
+            },
+            {
+              "name": "by-category",
+              "item": [
+                {
+                  "name": "Breaks down the current user's spending by category.",
+                  "request": {
+                    "method": "GET",
+                    "header": [],
+                    "url": {
+                      "raw": "{{baseUrl}}/api/dashboard/by-category?From=2017-01-25&To=2017-01-25",
+                      "host": [
+                        "{{baseUrl}}"
+                      ],
+                      "path": [
+                        "api",
+                        "dashboard",
+                        "by-category"
+                      ],
+                      "query": [
+                        {
+                          "description": "Only include expenses on or after this date.",
+                          "key": "From",
+                          "value": "2017-01-25"
+                        },
+                        {
+                          "description": "Only include expenses on or before this date.",
+                          "key": "To",
+                          "value": "2017-01-25"
+                        }
+                      ]
+                    },
+                    "description": "Each entry has the amount spent and its share of the total as a percentage\n(rounded to 1 decimal place). Results are ordered from highest to lowest amount.\nCategories with no spending in the range are left out."
+                  },
+                  "response": [
+                    {
+                      "name": "Spending per category for the date range.",
+                      "originalRequest": {
+                        "method": "GET",
+                        "header": [],
+                        "url": {
+                          "raw": "{{baseUrl}}/api/dashboard/by-category?From=2017-01-25&To=2017-01-25",
+                          "host": [
+                            "{{baseUrl}}"
+                          ],
+                          "path": [
+                            "api",
+                            "dashboard",
+                            "by-category"
+                          ],
+                          "query": [
+                            {
+                              "description": "Only include expenses on or after this date.",
+                              "key": "From",
+                              "value": "2017-01-25"
+                            },
+                            {
+                              "description": "Only include expenses on or before this date.",
+                              "key": "To",
+                              "value": "2017-01-25"
+                            }
+                          ]
+                        }
+                      },
+                      "status": "OK",
+                      "code": 200,
+                      "_postman_previewlanguage": "text",
+                      "header": [],
+                      "cookie": [],
+                      "body": null
+                    }
+                  ]
+                }
+              ]
+            },
+            {
+              "name": "by-day",
+              "item": [
+                {
+                  "name": "Returns the current user's spending over time, for charting.",
+                  "request": {
+                    "method": "GET",
+                    "header": [],
+                    "url": {
+                      "raw": "{{baseUrl}}/api/dashboard/by-day?From=2017-01-25&To=2017-01-25",
+                      "host": [
+                        "{{baseUrl}}"
+                      ],
+                      "path": [
+                        "api",
+                        "dashboard",
+                        "by-day"
+                      ],
+                      "query": [
+                        {
+                          "description": "Only include expenses on or after this date.",
+                          "key": "From",
+                          "value": "2017-01-25"
+                        },
+                        {
+                          "description": "Only include expenses on or before this date.",
+                          "key": "To",
+                          "value": "2017-01-25"
+                        }
+                      ]
+                    },
+                    "description": "The bucket size depends on how many days the range covers:\nup to 31 days returns one entry per day, up to 120 days groups by week (starting Monday),\nand anything longer groups by month. Buckets with no spending are left out.\nWhen From or To is not given, the earliest or latest expense date is used instead."
+                  },
+                  "response": [
+                    {
+                      "name": "Spending per day, week or month, ordered by date.",
+                      "originalRequest": {
+                        "method": "GET",
+                        "header": [],
+                        "url": {
+                          "raw": "{{baseUrl}}/api/dashboard/by-day?From=2017-01-25&To=2017-01-25",
+                          "host": [
+                            "{{baseUrl}}"
+                          ],
+                          "path": [
+                            "api",
+                            "dashboard",
+                            "by-day"
+                          ],
+                          "query": [
+                            {
+                              "description": "Only include expenses on or after this date.",
+                              "key": "From",
+                              "value": "2017-01-25"
+                            },
+                            {
+                              "description": "Only include expenses on or before this date.",
+                              "key": "To",
+                              "value": "2017-01-25"
+                            }
+                          ]
+                        }
+                      },
+                      "status": "OK",
+                      "code": 200,
+                      "_postman_previewlanguage": "text",
+                      "header": [],
+                      "cookie": [],
+                      "body": null
+                    }
+                  ]
+                }
+              ]
+            },
+            {
+              "name": "top-expenses",
+              "item": [
+                {
+                  "name": "Returns the current user's 10 largest expenses.",
+                  "request": {
+                    "method": "GET",
+                    "header": [],
+                    "url": {
+                      "raw": "{{baseUrl}}/api/dashboard/top-expenses?From=2017-01-25&To=2017-01-25",
+                      "host": [
+                        "{{baseUrl}}"
+                      ],
+                      "path": [
+                        "api",
+                        "dashboard",
+                        "top-expenses"
+                      ],
+                      "query": [
+                        {
+                          "description": "Only include expenses on or after this date.",
+                          "key": "From",
+                          "value": "2017-01-25"
+                        },
+                        {
+                          "description": "Only include expenses on or before this date.",
+                          "key": "To",
+                          "value": "2017-01-25"
+                        }
+                      ]
+                    }
+                  },
+                  "response": [
+                    {
+                      "name": "Up to 10 expenses, ordered from highest to lowest amount.",
+                      "originalRequest": {
+                        "method": "GET",
+                        "header": [],
+                        "url": {
+                          "raw": "{{baseUrl}}/api/dashboard/top-expenses?From=2017-01-25&To=2017-01-25",
+                          "host": [
+                            "{{baseUrl}}"
+                          ],
+                          "path": [
+                            "api",
+                            "dashboard",
+                            "top-expenses"
+                          ],
+                          "query": [
+                            {
+                              "description": "Only include expenses on or after this date.",
+                              "key": "From",
+                              "value": "2017-01-25"
+                            },
+                            {
+                              "description": "Only include expenses on or before this date.",
+                              "key": "To",
+                              "value": "2017-01-25"
+                            }
+                          ]
+                        }
+                      },
+                      "status": "OK",
+                      "code": 200,
+                      "_postman_previewlanguage": "text",
+                      "header": [],
+                      "cookie": [],
+                      "body": null
+                    }
+                  ]
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "name": "expenses",
+          "item": [
+            {
+              "name": "{id}",
+              "item": [
+                {
+                  "name": "Gets a single expense by id.",
+                  "request": {
+                    "method": "GET",
+                    "header": [],
+                    "url": {
+                      "raw": "{{baseUrl}}/api/expenses/:id",
+                      "host": [
+                        "{{baseUrl}}"
+                      ],
+                      "path": [
+                        "api",
+                        "expenses",
+                        ":id"
+                      ],
+                      "variable": [
+                        {
+                          "key": "id",
+                          "value": "f4e408d5-f84b-0152-37ae-b5cd8ff6c225",
+                          "description": "The expense id."
+                        }
+                      ]
+                    }
+                  },
+                  "response": [
+                    {
+                      "name": "The requested expense.",
+                      "originalRequest": {
+                        "method": "GET",
+                        "header": [],
+                        "url": {
+                          "raw": "{{baseUrl}}/api/expenses/:id",
+                          "host": [
+                            "{{baseUrl}}"
+                          ],
+                          "path": [
+                            "api",
+                            "expenses",
+                            ":id"
+                          ],
+                          "variable": [
+                            {
+                              "key": "id",
+                              "value": "f4e408d5-f84b-0152-37ae-b5cd8ff6c225",
+                              "description": "The expense id."
+                            }
+                          ]
+                        }
+                      },
+                      "status": "OK",
+                      "code": 200,
+                      "_postman_previewlanguage": "text",
+                      "header": [],
+                      "cookie": [],
+                      "body": null
+                    }
+                  ]
+                },
+                {
+                  "name": "Replaces the details of an existing expense.",
+                  "request": {
+                    "method": "PUT",
+                    "header": [
+                      {
+                        "key": "Content-Type",
+                        "value": "application/json"
+                      }
+                    ],
+                    "body": {
+                      "mode": "raw",
+                      "raw": "{\n  \"categoryId\": \"5\",\n  \"amount\": \"165252\",\n  \"description\": \"string\",\n  \"expenseDate\": \"1971-11-14\"\n}",
+                      "options": {
+                        "raw": {
+                          "headerFamily": "json",
+                          "language": "json"
+                        }
+                      }
+                    },
+                    "url": {
+                      "raw": "{{baseUrl}}/api/expenses/:id",
+                      "host": [
+                        "{{baseUrl}}"
+                      ],
+                      "path": [
+                        "api",
+                        "expenses",
+                        ":id"
+                      ],
+                      "variable": [
+                        {
+                          "key": "id",
+                          "value": "f4e408d5-f84b-0152-37ae-b5cd8ff6c225",
+                          "description": "The expense id."
+                        }
+                      ]
+                    }
+                  },
+                  "response": [
+                    {
+                      "name": "OK",
+                      "originalRequest": {
+                        "method": "PUT",
+                        "header": [
+                          {
+                            "key": "Content-Type",
+                            "value": "application/json"
+                          }
+                        ],
+                        "body": {
+                          "mode": "raw",
+                          "raw": "{\n  \"categoryId\": \"5\",\n  \"amount\": \"165252\",\n  \"description\": \"string\",\n  \"expenseDate\": \"1971-11-14\"\n}",
+                          "options": {
+                            "raw": {
+                              "headerFamily": "json",
+                              "language": "json"
+                            }
+                          }
+                        },
+                        "url": {
+                          "raw": "{{baseUrl}}/api/expenses/:id",
+                          "host": [
+                            "{{baseUrl}}"
+                          ],
+                          "path": [
+                            "api",
+                            "expenses",
+                            ":id"
+                          ],
+                          "variable": [
+                            {
+                              "key": "id",
+                              "value": "f4e408d5-f84b-0152-37ae-b5cd8ff6c225",
+                              "description": "The expense id."
+                            }
+                          ]
+                        }
+                      },
+                      "status": "OK",
+                      "code": 200,
+                      "_postman_previewlanguage": "text",
+                      "header": [],
+                      "cookie": [],
+                      "body": null
+                    }
+                  ]
+                },
+                {
+                  "name": "Deletes an expense.",
+                  "request": {
+                    "method": "DELETE",
+                    "header": [],
+                    "url": {
+                      "raw": "{{baseUrl}}/api/expenses/:id",
+                      "host": [
+                        "{{baseUrl}}"
+                      ],
+                      "path": [
+                        "api",
+                        "expenses",
+                        ":id"
+                      ],
+                      "variable": [
+                        {
+                          "key": "id",
+                          "value": "f4e408d5-f84b-0152-37ae-b5cd8ff6c225",
+                          "description": "The expense id."
+                        }
+                      ]
+                    }
+                  },
+                  "response": [
+                    {
+                      "name": "OK",
+                      "originalRequest": {
+                        "method": "DELETE",
+                        "header": [],
+                        "url": {
+                          "raw": "{{baseUrl}}/api/expenses/:id",
+                          "host": [
+                            "{{baseUrl}}"
+                          ],
+                          "path": [
+                            "api",
+                            "expenses",
+                            ":id"
+                          ],
+                          "variable": [
+                            {
+                              "key": "id",
+                              "value": "f4e408d5-f84b-0152-37ae-b5cd8ff6c225",
+                              "description": "The expense id."
+                            }
+                          ]
+                        }
+                      },
+                      "status": "OK",
+                      "code": 200,
+                      "_postman_previewlanguage": "text",
+                      "header": [],
+                      "cookie": [],
+                      "body": null
+                    }
+                  ]
+                }
+              ]
+            },
+            {
+              "name": "Lists the current user's expenses with filtering, sorting and paging.",
+              "request": {
+                "method": "GET",
+                "header": [],
+                "url": {
+                  "raw": "{{baseUrl}}/api/expenses?CategoryId=-0&MinAmount=0.1&MaxAmount=0.1&FromDate=2017-01-25&ToDate=2017-01-25&Search=string&SortBy=string&SortDirection=string&Page=-0&PageSize=-0",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "api",
+                    "expenses"
+                  ],
+                  "query": [
+                    {
+                      "description": "Only include expenses in this category.",
+                      "key": "CategoryId",
+                      "value": "-0"
+                    },
+                    {
+                      "description": "Only include expenses with an amount of at least this value.",
+                      "key": "MinAmount",
+                      "value": "0.1"
+                    },
+                    {
+                      "description": "Only include expenses with an amount of at most this value.",
+                      "key": "MaxAmount",
+                      "value": "0.1"
+                    },
+                    {
+                      "description": "Only include expenses on or after this date.",
+                      "key": "FromDate",
+                      "value": "2017-01-25"
+                    },
+                    {
+                      "description": "Only include expenses on or before this date.",
+                      "key": "ToDate",
+                      "value": "2017-01-25"
+                    },
+                    {
+                      "description": "Case-insensitive text to match anywhere in the description.",
+                      "key": "Search",
+                      "value": "string"
+                    },
+                    {
+                      "description": "Field to sort by: \"amount\", \"createdAt\" or \"expenseDate\". Defaults to \"expenseDate\".",
+                      "key": "SortBy",
+                      "value": "string"
+                    },
+                    {
+                      "description": "\"asc\" or \"desc\". Defaults to \"desc\".",
+                      "key": "SortDirection",
+                      "value": "string"
+                    },
+                    {
+                      "description": "1-based page number. Defaults to 1.",
+                      "key": "Page",
+                      "value": "-0"
+                    },
+                    {
+                      "description": "Number of items per page. Defaults to 20, maximum 100.",
+                      "key": "PageSize",
+                      "value": "-0"
+                    }
+                  ]
+                },
+                "description": "All filters are optional and combine with AND. Search is a case-insensitive match\non the description. SortBy accepts \"amount\", \"createdAt\" or \"expenseDate\" (the default),\nand SortDirection accepts \"asc\" or \"desc\" (the default).\nPage defaults to 1, and PageSize defaults to 20 with a maximum of 100."
+              },
+              "response": [
+                {
+                  "name": "A page of expenses along with paging metadata.",
+                  "originalRequest": {
+                    "method": "GET",
+                    "header": [],
+                    "url": {
+                      "raw": "{{baseUrl}}/api/expenses?CategoryId=-0&MinAmount=0.1&MaxAmount=0.1&FromDate=2017-01-25&ToDate=2017-01-25&Search=string&SortBy=string&SortDirection=string&Page=-0&PageSize=-0",
+                      "host": [
+                        "{{baseUrl}}"
+                      ],
+                      "path": [
+                        "api",
+                        "expenses"
+                      ],
+                      "query": [
+                        {
+                          "description": "Only include expenses in this category.",
+                          "key": "CategoryId",
+                          "value": "-0"
+                        },
+                        {
+                          "description": "Only include expenses with an amount of at least this value.",
+                          "key": "MinAmount",
+                          "value": "0.1"
+                        },
+                        {
+                          "description": "Only include expenses with an amount of at most this value.",
+                          "key": "MaxAmount",
+                          "value": "0.1"
+                        },
+                        {
+                          "description": "Only include expenses on or after this date.",
+                          "key": "FromDate",
+                          "value": "2017-01-25"
+                        },
+                        {
+                          "description": "Only include expenses on or before this date.",
+                          "key": "ToDate",
+                          "value": "2017-01-25"
+                        },
+                        {
+                          "description": "Case-insensitive text to match anywhere in the description.",
+                          "key": "Search",
+                          "value": "string"
+                        },
+                        {
+                          "description": "Field to sort by: \"amount\", \"createdAt\" or \"expenseDate\". Defaults to \"expenseDate\".",
+                          "key": "SortBy",
+                          "value": "string"
+                        },
+                        {
+                          "description": "\"asc\" or \"desc\". Defaults to \"desc\".",
+                          "key": "SortDirection",
+                          "value": "string"
+                        },
+                        {
+                          "description": "1-based page number. Defaults to 1.",
+                          "key": "Page",
+                          "value": "-0"
+                        },
+                        {
+                          "description": "Number of items per page. Defaults to 20, maximum 100.",
+                          "key": "PageSize",
+                          "value": "-0"
+                        }
+                      ]
+                    }
+                  },
+                  "status": "OK",
+                  "code": 200,
+                  "_postman_previewlanguage": "text",
+                  "header": [],
+                  "cookie": [],
+                  "body": null
+                }
+              ]
+            },
+            {
+              "name": "Creates a new expense for the current user.",
+              "request": {
+                "method": "POST",
+                "header": [
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  }
+                ],
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"categoryId\": \"5\",\n  \"amount\": \"165252\",\n  \"description\": \"string\",\n  \"expenseDate\": \"1971-11-14\"\n}",
+                  "options": {
+                    "raw": {
+                      "headerFamily": "json",
+                      "language": "json"
+                    }
+                  }
+                },
+                "url": {
+                  "raw": "{{baseUrl}}/api/expenses",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "api",
+                    "expenses"
+                  ]
+                }
+              },
+              "response": [
+                {
+                  "name": "OK",
+                  "originalRequest": {
+                    "method": "POST",
+                    "header": [
+                      {
+                        "key": "Content-Type",
+                        "value": "application/json"
+                      }
+                    ],
+                    "body": {
+                      "mode": "raw",
+                      "raw": "{\n  \"categoryId\": \"5\",\n  \"amount\": \"165252\",\n  \"description\": \"string\",\n  \"expenseDate\": \"1971-11-14\"\n}",
+                      "options": {
+                        "raw": {
+                          "headerFamily": "json",
+                          "language": "json"
+                        }
+                      }
+                    },
+                    "url": {
+                      "raw": "{{baseUrl}}/api/expenses",
+                      "host": [
+                        "{{baseUrl}}"
+                      ],
+                      "path": [
+                        "api",
+                        "expenses"
+                      ]
+                    }
+                  },
+                  "status": "OK",
+                  "code": 200,
+                  "_postman_previewlanguage": "text",
+                  "header": [],
+                  "cookie": [],
+                  "body": null
+                }
+              ]
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "Get Token",
+      "request": {
+        "method": "GET",
+        "header": []
+      },
+      "response": []
+    }
+  ],
+  "auth": {
+    "type": "bearer",
+    "bearer": [
+      {
+        "key": "token",
+        "value": "{{access_token}}",
+        "type": "string"
+      }
+    ]
+  },
+  "event": [
+    {
+      "listen": "prerequest",
+      "script": {
+        "type": "text/javascript",
+        "packages": {},
+        "requests": {},
+        "exec": [
+          ""
+        ]
+      }
+    },
+    {
+      "listen": "test",
+      "script": {
+        "type": "text/javascript",
+        "packages": {},
+        "requests": {},
+        "exec": [
+          ""
+        ]
+      }
+    }
+  ],
+  "variable": [
+    {
+      "key": "baseUrl",
+      "value": "http://localhost:5048"
+    },
+    {
+      "key": "access_token",
+      "value": ""
+    }
+  ]
+}
