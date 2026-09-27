@@ -5,4 +5,7 @@
     <Project Path="src/Finance.Domain/Finance.Domain.csproj" />
     <Project Path="src/Finance.Infrastructure/Finance.Infrastructure.csproj" />
   </Folder>
+  <Folder Name="/tests/">
+    <Project Path="tests/Finance.UnitTests/Finance.UnitTests.csproj" />
+  </Folder>
 </Solution>
