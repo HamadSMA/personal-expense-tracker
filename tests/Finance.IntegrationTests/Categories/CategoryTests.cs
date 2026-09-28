@@ -16,10 +16,10 @@ public class CategoryTests
     [Fact]
     public async Task Get_categories_returns_the_nine_seeded()
     {
-        // Act
+        // Act: anonymous request, categories are public
         var response = await _client.GetAsync("/api/categories");
 
-        // Assert
+        // Assert: all nine seeded rows, ordered by id
         Assert.Equal(HttpStatusCode.OK, response.StatusCode);
         var categories = await response.Content.ReadFromJsonAsync<List<CategoryDto>>();
         Assert.NotNull(categories);

@@ -17,7 +17,7 @@ public class ExpenseValidationApiTests
     [Fact]
     public async Task Create_with_zero_amount_returns_400()
     {
-        // Arrange
+        // Arrange: zero amount
         var body = new
         {
             categoryId = 1,
@@ -26,17 +26,17 @@ public class ExpenseValidationApiTests
             expenseDate = DateOnly.FromDateTime(DateTime.UtcNow)
         };
 
-        // Act
+        // Act: post the invalid body
         var response = await _client.PostAsJsonAsync("/api/expenses", body);
 
-        // Assert
+        // Assert: rejected by validation
         Assert.Equal(HttpStatusCode.BadRequest, response.StatusCode);
     }
 
     [Fact]
     public async Task Create_with_more_than_two_decimals_returns_400()
     {
-        // Arrange
+        // Arrange: three decimal places
         var body = new
         {
             categoryId = 1,
@@ -45,17 +45,17 @@ public class ExpenseValidationApiTests
             expenseDate = DateOnly.FromDateTime(DateTime.UtcNow)
         };
 
-        // Act
+        // Act: post the invalid body
         var response = await _client.PostAsJsonAsync("/api/expenses", body);
 
-        // Assert
+        // Assert: rejected by validation
         Assert.Equal(HttpStatusCode.BadRequest, response.StatusCode);
     }
 
     [Fact]
     public async Task Create_with_unknown_category_returns_400()
     {
-        // Arrange
+        // Arrange: category outside the seeded set
         var body = new
         {
             categoryId = 999,
@@ -64,17 +64,17 @@ public class ExpenseValidationApiTests
             expenseDate = DateOnly.FromDateTime(DateTime.UtcNow)
         };
 
-        // Act
+        // Act: post the invalid body
         var response = await _client.PostAsJsonAsync("/api/expenses", body);
 
-        // Assert
+        // Assert: rejected by validation
         Assert.Equal(HttpStatusCode.BadRequest, response.StatusCode);
     }
 
     [Fact]
     public async Task Create_with_future_date_returns_400()
     {
-        // Arrange
+        // Arrange: tomorrow's date
         var body = new
         {
             categoryId = 1,
@@ -83,10 +83,10 @@ public class ExpenseValidationApiTests
             expenseDate = DateOnly.FromDateTime(DateTime.UtcNow).AddDays(1)
         };
 
-        // Act
+        // Act: post the invalid body
         var response = await _client.PostAsJsonAsync("/api/expenses", body);
 
-        // Assert
+        // Assert: rejected by validation
         Assert.Equal(HttpStatusCode.BadRequest, response.StatusCode);
     }
 }

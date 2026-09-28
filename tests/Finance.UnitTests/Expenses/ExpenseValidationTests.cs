@@ -11,7 +11,7 @@ public class ExpenseValidationTests
     [InlineData(-0.01)]
     public void Amount_zero_or_negative_is_rejected(decimal amount)
     {
-        // Arrange
+        // Arrange: zero or negative amount
         var request = new CreateExpenseRequest(
             1,
             amount,
@@ -19,10 +19,10 @@ public class ExpenseValidationTests
             DateOnly.FromDateTime(DateTime.UtcNow)
         );
 
-        // Act
+        // Act: run the request's own Validate
         var results = request.Validate(new ValidationContext(request)).ToList();
 
-        // Assert
+        // Assert: amount error is reported
         Assert.Contains(results, r => r.ErrorMessage == "Amount must be greater than zero.");
     }
 
@@ -31,7 +31,7 @@ public class ExpenseValidationTests
     [InlineData(0.999)]
     public void Amount_with_more_than_two_decimals_is_rejected(decimal amount)
     {
-        // Arrange
+        // Arrange: amount with three decimal places
         var request = new CreateExpenseRequest(
             1,
             amount,
@@ -39,10 +39,10 @@ public class ExpenseValidationTests
             DateOnly.FromDateTime(DateTime.UtcNow)
         );
 
-        // Act
+        // Act: run the request's own Validate
         var results = request.Validate(new ValidationContext(request)).ToList();
 
-        // Assert
+        // Assert: decimal places error is reported
         Assert.Contains(
             results,
             r => r.ErrorMessage == "Amount cannot have more than 2 decimal places."
@@ -54,7 +54,7 @@ public class ExpenseValidationTests
     [InlineData(10)]
     public void Amount_positive_with_two_or_fewer_decimals_passes(decimal amount)
     {
-        // Arrange
+        // Arrange: positive amount with at most two decimals
         var request = new CreateExpenseRequest(
             1,
             amount,
@@ -62,10 +62,10 @@ public class ExpenseValidationTests
             DateOnly.FromDateTime(DateTime.UtcNow)
         );
 
-        // Act
+        // Act: run the request's own Validate
         var results = request.Validate(new ValidationContext(request)).ToList();
 
-        // Assert
+        // Assert: no errors
         Assert.Empty(results);
     }
 
@@ -75,7 +75,7 @@ public class ExpenseValidationTests
     [InlineData(-1)]
     public void Category_outside_seeded_set_is_rejected(int categoryId)
     {
-        // Arrange
+        // Arrange: category id outside 1 to 9
         var request = new CreateExpenseRequest(
             categoryId,
             10.50m,
@@ -83,10 +83,10 @@ public class ExpenseValidationTests
             DateOnly.FromDateTime(DateTime.UtcNow)
         );
 
-        // Act
+        // Act: run the request's own Validate
         var results = request.Validate(new ValidationContext(request)).ToList();
 
-        // Assert
+        // Assert: at least one error
         Assert.NotEmpty(results);
     }
 
@@ -95,7 +95,7 @@ public class ExpenseValidationTests
     [InlineData(9)]
     public void Category_within_seeded_set_passes(int categoryId)
     {
-        // Arrange
+        // Arrange: category id inside 1 to 9
         var request = new CreateExpenseRequest(
             categoryId,
             10.50m,
@@ -103,24 +103,24 @@ public class ExpenseValidationTests
             DateOnly.FromDateTime(DateTime.UtcNow)
         );
 
-        // Act
+        // Act: run the request's own Validate
         var results = request.Validate(new ValidationContext(request)).ToList();
 
-        // Assert
+        // Assert: no errors
         Assert.Empty(results);
     }
 
     [Fact]
     public void Future_date_is_rejected()
     {
-        // Arrange
+        // Arrange: tomorrow's date
         var tomorrow = DateOnly.FromDateTime(DateTime.UtcNow).AddDays(1);
         var request = new CreateExpenseRequest(1, 10.50m, "desc", tomorrow);
 
-        // Act
+        // Act: run the request's own Validate
         var results = request.Validate(new ValidationContext(request)).ToList();
 
-        // Assert
+        // Assert: future date error is reported
         Assert.Contains(results, r => r.ErrorMessage == "Expense date cannot be in the future.");
     }
 
@@ -129,21 +129,21 @@ public class ExpenseValidationTests
     [InlineData(-1)]
     public void Today_or_past_date_passes(int dayOffset)
     {
-        // Arrange
+        // Arrange: today or yesterday
         var date = DateOnly.FromDateTime(DateTime.UtcNow).AddDays(dayOffset);
         var request = new CreateExpenseRequest(1, 10.50m, "desc", date);
 
-        // Act
+        // Act: run the request's own Validate
         var results = request.Validate(new ValidationContext(request)).ToList();
 
-        // Assert
+        // Assert: no errors
         Assert.Empty(results);
     }
 
     [Fact]
     public void Fully_valid_request_has_no_errors()
     {
-        // Arrange
+        // Arrange: every field valid
         var request = new CreateExpenseRequest(
             1,
             10.50m,
@@ -151,17 +151,17 @@ public class ExpenseValidationTests
             DateOnly.FromDateTime(DateTime.UtcNow)
         );
 
-        // Act
+        // Act: run the request's own Validate
         var results = request.Validate(new ValidationContext(request)).ToList();
 
-        // Assert
+        // Assert: no errors
         Assert.Empty(results);
     }
 
     [Fact]
     public void Update_request_rejects_zero_amount()
     {
-        // Arrange
+        // Arrange: update request with a zero amount
         var request = new UpdateExpenseRequest(
             1,
             0m,
@@ -169,17 +169,17 @@ public class ExpenseValidationTests
             DateOnly.FromDateTime(DateTime.UtcNow)
         );
 
-        // Act
+        // Act: run the request's own Validate
         var results = request.Validate(new ValidationContext(request)).ToList();
 
-        // Assert
+        // Assert: amount error is reported
         Assert.Contains(results, r => r.ErrorMessage == "Amount must be greater than zero.");
     }
 
     [Fact]
     public void Update_request_fully_valid_has_no_errors()
     {
-        // Arrange
+        // Arrange: update request with every field valid
         var request = new UpdateExpenseRequest(
             1,
             10.50m,
@@ -187,10 +187,10 @@ public class ExpenseValidationTests
             DateOnly.FromDateTime(DateTime.UtcNow)
         );
 
-        // Act
+        // Act: run the request's own Validate
         var results = request.Validate(new ValidationContext(request)).ToList();
 
-        // Assert
+        // Assert: no errors
         Assert.Empty(results);
     }
 }
