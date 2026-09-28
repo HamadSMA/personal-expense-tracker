@@ -68,9 +68,9 @@ public class DashboardTimeSeriesTests
         );
 
         // Assert: one weekly bucket dated to that week's Monday, amounts summed
-        Assert.Single(result!);
-        Assert.Equal(new DateOnly(2026, 1, 5), result[0].Date);
-        Assert.Equal(25.00m, result[0].Amount);
+        var week = Assert.Single(result!);
+        Assert.Equal(new DateOnly(2026, 1, 5), week.Date);
+        Assert.Equal(25.00m, week.Amount);
     }
 
     [Fact]
@@ -88,9 +88,9 @@ public class DashboardTimeSeriesTests
         );
 
         // Assert: one monthly bucket dated to the 1st, amounts summed
-        Assert.Single(result!);
-        Assert.Equal(new DateOnly(2026, 2, 1), result[0].Date);
-        Assert.Equal(50.00m, result[0].Amount);
+        var month = Assert.Single(result!);
+        Assert.Equal(new DateOnly(2026, 2, 1), month.Date);
+        Assert.Equal(50.00m, month.Amount);
     }
 
     [Fact]
