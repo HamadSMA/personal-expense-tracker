@@ -5,7 +5,8 @@ Built with ASP.NET Core 10, Clean Architecture, PostgreSQL and Keycloak. The dom
 deliberately small (amounts in SAR; no multi-currency, accounts, budgets or transfers) so the
 engineering around it can be the interesting part.
 
-**Status:** backend complete through Phase 3 (secured API). Testing and quality are next.
+**Status:** backend complete through Phase 3 (secured API), with unit and integration tests
+from Phase 4 in place. Structured logging and health checks are next.
 
 ## Tech Stack
 
@@ -16,6 +17,7 @@ engineering around it can be the interesting part.
 | **Auth** | Keycloak, OIDC / OAuth 2.0, JWT bearer validation |
 | **API** | REST, OpenAPI, Scalar, RFC 7807 ProblemDetails |
 | **Architecture** | Clean Architecture, 4 projects |
+| **Testing** | xUnit, WebApplicationFactory, Testcontainers (PostgreSQL) |
 
 ## Key Features
 
@@ -32,7 +34,7 @@ engineering around it can be the interesting part.
 - **API documentation:** OpenAPI generated from XML doc comments, browsable in Scalar with
   bearer auth built in
 
-**Not built yet:** automated tests, health checks, Docker Compose, CI, frontend.
+**Not built yet:** structured logging, health checks, Docker Compose, CI, frontend.
 
 ## Architecture
 
@@ -94,12 +96,39 @@ The API also needs a Keycloak realm to issue tokens. See
 [docs/local-setup.md](docs/local-setup.md) for the Keycloak setup, configuration details and
 the included REST Client and Postman test suites.
 
+## Testing
+
+```bash
+dotnet test
+```
+
+The integration tests need Docker running; the unit tests do not.
+
+| Project | Covers |
+| --- | --- |
+| `Finance.UnitTests` | Expense validation rules in `Finance.Application`, no I/O |
+| `Finance.IntegrationTests` | The full HTTP pipeline against a real PostgreSQL database |
+
+The integration tests boot the API in memory with `WebApplicationFactory` and point it at a
+throwaway `postgres:18` container started by Testcontainers, with migrations applied on
+startup. One container is shared across the whole suite through an xUnit collection fixture.
+Keycloak is swapped for a test authentication handler that builds the user from an
+`X-Test-Sub` header, so tests can act as different users without issuing real tokens.
+
+They cover:
+
+- **Expenses:** CRUD, validation errors, filtering, sorting and pagination
+- **Ownership:** another user's expenses return `404` on read, update and delete; no token
+  returns `401`
+- **Dashboard:** summary totals, spend by category and time series bucketing
+- **Categories:** the public category list
+
 ## Roadmap
 
 - [x] **Phase 1, Core Backend:** Clean Architecture, EF Core, PostgreSQL, CRUD, ProblemDetails
 - [x] **Phase 2, Real API:** validation, filtering, sorting, pagination, dashboard aggregation
 - [x] **Phase 3, Security:** Keycloak, OIDC, JWT bearer, per-user ownership
-- [ ] **Phase 4, Quality:** xUnit, Testcontainers integration tests, structured logging, health checks
+- [x] **Phase 4, Quality:** xUnit unit tests, Testcontainers integration tests
 - [ ] **Phase 5, Infrastructure:** Dockerfiles, Docker Compose for the full stack, GitHub Actions CI
 - [ ] **Phase 6, Optional:** Azure Container Apps, Entra ID, Redis, OpenTelemetry, rate limiting
 - [ ] **Phase 7, Optional Frontend:** React, TypeScript, OIDC login, expense UI, charts
