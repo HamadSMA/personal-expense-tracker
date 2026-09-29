@@ -128,7 +128,8 @@ They cover:
 - [x] **Phase 1, Core Backend:** Clean Architecture, EF Core, PostgreSQL, CRUD, ProblemDetails
 - [x] **Phase 2, Real API:** validation, filtering, sorting, pagination, dashboard aggregation
 - [x] **Phase 3, Security:** Keycloak, OIDC, JWT bearer, per-user ownership
-- [x] **Phase 4, Quality:** xUnit unit tests, Testcontainers integration tests
+- [x] **Phase 4, Quality:** ~~xUnit unit tests~~, ~~Testcontainers integration tests~~, structured
+  logging, health checks
 - [ ] **Phase 5, Infrastructure:** Dockerfiles, Docker Compose for the full stack, GitHub Actions CI
 - [ ] **Phase 6, Optional:** Azure Container Apps, Entra ID, Redis, OpenTelemetry, rate limiting
 - [ ] **Phase 7, Optional Frontend:** React, TypeScript, OIDC login, expense UI, charts
