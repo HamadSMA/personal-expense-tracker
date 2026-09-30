@@ -13,6 +13,9 @@ jobs:
   build:
 
     runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      packages: write
 
     steps:
     - uses: actions/checkout@v7
@@ -29,4 +32,10 @@ jobs:
     - name: Integration tests
       run: dotnet test tests/Finance.IntegrationTests --no-build --configuration Release --verbosity normal
     - name: Docker build
-      run: docker build -t finance-api .
+      run: docker build -t ghcr.io/hamadsma/finance-api:latest -t ghcr.io/hamadsma/finance-api:${{ github.sha }} .
+    - name: Log in to GitHub Container Registry
+      if: github.event_name == 'push'
+      run: echo "${{ secrets.GITHUB_TOKEN }}" | docker login ghcr.io -u ${{ github.actor }} --password-stdin
+    - name: Push image
+      if: github.event_name == 'push'
+      run: docker push --all-tags ghcr.io/hamadsma/finance-api
