@@ -1,7 +1,7 @@
 # This workflow will build a .NET project
 # For more information see: https://docs.github.com/en/actions/automating-builds-and-tests/building-and-testing-net
 
-name: .NET
+name: CI
 
 on:
   push:
@@ -19,10 +19,14 @@ jobs:
     - name: Setup .NET
       uses: actions/setup-dotnet@v4
       with:
-        dotnet-version: 8.0.x
+        dotnet-version: 10.0.103
     - name: Restore dependencies
-      run: dotnet restore
+      run: dotnet restore Finance.slnx
     - name: Build
-      run: dotnet build --no-restore
-    - name: Test
-      run: dotnet test --no-build --verbosity normal
+      run: dotnet build Finance.slnx --no-restore --configuration Release
+    - name: Unit tests
+      run: dotnet test tests/Finance.UnitTests --no-build --configuration Release --verbosity normal
+    - name: Integration tests
+      run: dotnet test tests/Finance.IntegrationTests --no-build --configuration Release --verbosity normal
+    - name: Docker build
+      run: docker build -t finance-api .
