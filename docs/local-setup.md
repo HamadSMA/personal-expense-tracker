@@ -1,7 +1,7 @@
 # Local Setup
 
-Full instructions for running the API on your machine, including the Keycloak
-configuration it needs to issue tokens. The [README](../README.md) has the short version.
+Instructions for running the API directly on your machine, outside Docker Compose, with
+Keycloak in a container. The [README](../README.md) covers the full Docker Compose stack.
 
 ## Prerequisites
 
@@ -12,25 +12,28 @@ configuration it needs to issue tokens. The [README](../README.md) has the short
 
 ## 1. Start Keycloak
 
+Run from the repository root:
+
 ```bash
 docker run -d --name keycloak -p 8080:8080 \
   -e KC_BOOTSTRAP_ADMIN_USERNAME=admin -e KC_BOOTSTRAP_ADMIN_PASSWORD=admin \
-  quay.io/keycloak/keycloak:26.7 start-dev
+  -v "$(pwd)/keycloak/finance-realm.json:/opt/keycloak/data/import/finance-realm.json:ro" \
+  quay.io/keycloak/keycloak:26.7 start-dev --import-realm
 ```
+
+On first start, Keycloak imports the `finance` realm from
+[`keycloak/finance-realm.json`](../keycloak/finance-realm.json): the `finance-api` audience
+client, and the public `finance-web` client with **Direct access grants** and an audience
+mapper adding `finance-api` to the token's `aud`.
 
 The admin console is on `http://localhost:8080` (login `admin` / `admin`).
 
-## 2. Configure Keycloak
+## 2. Create a Keycloak user
 
-In the admin console, create:
-
-- A realm named `finance`
-- A client `finance-api`. This is the API's audience; it logs nobody in
-- A public client `finance-web` with **Direct access grants** enabled, and an
-  **audience mapper** adding `finance-api` to the token's `aud`
-- A user with a password (**Temporary** off) and a complete profile: first name, last
-  name and email. Without them, Keycloak's default *Verify Profile* action blocks token
-  issuance with `400 Account is not fully set up`
+The realm export contains no users. In the admin console, under the `finance` realm, create a
+user with a password (**Temporary** off) and a complete profile: first name, last name and
+email. Without them, Keycloak's default *Verify Profile* action blocks token issuance with
+`400 Account is not fully set up`.
 
 ## 3. Configure the API
 

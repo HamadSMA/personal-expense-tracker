@@ -6,7 +6,8 @@ deliberately small (amounts in SAR; no multi-currency, accounts, budgets or tran
 engineering around it can be the interesting part.
 
 **Status:** backend complete through Phase 3 (secured API), with unit and integration tests
-from Phase 4 in place. Structured logging and health checks are next.
+from Phase 4 in place. The full stack (API, PostgreSQL, Keycloak) now runs with Docker Compose.
+Structured logging, health checks and CI are next.
 
 ## Tech Stack
 
@@ -18,6 +19,7 @@ from Phase 4 in place. Structured logging and health checks are next.
 | **API** | REST, OpenAPI, Scalar, RFC 7807 ProblemDetails |
 | **Architecture** | Clean Architecture, 4 projects |
 | **Testing** | xUnit, WebApplicationFactory, Testcontainers (PostgreSQL) |
+| **Infrastructure** | Docker, Docker Compose |
 
 ## Key Features
 
@@ -34,7 +36,7 @@ from Phase 4 in place. Structured logging and health checks are next.
 - **API documentation:** OpenAPI generated from XML doc comments, browsable in Scalar with
   bearer auth built in
 
-**Not built yet:** structured logging, health checks, Docker Compose, CI, frontend.
+**Not built yet:** structured logging, health checks, CI, frontend.
 
 ## Architecture
 
@@ -81,6 +83,30 @@ token, `404` not found or not yours.
 
 Full request and response documentation is served by Scalar at
 [`/scalar/v1`](http://localhost:5048/scalar/v1) when running locally.
+
+## Running with Docker Compose
+
+Requires Docker and the EF Core CLI.
+
+```bash
+cp .env.example .env
+docker compose up --build -d
+dotnet ef database update --project src/Finance.Infrastructure --startup-project src/Finance.Api \
+  --connection "Host=localhost;Port=5433;Database=finance;Username=finance;Password=<POSTGRES_PASSWORD from .env>"
+```
+
+This starts three containers:
+
+| Service | Port | Notes |
+| --- | --- | --- |
+| `api` | `5048` | Runs in Production, so Scalar is not mapped |
+| `db` | `5433` | PostgreSQL 18; data kept in the `db-data` volume |
+| `keycloak` | `8080` | Imports the `finance` realm from `keycloak/finance-realm.json` on first start |
+
+The migration step creates the schema and seeds the categories; the API does not migrate on
+startup. The realm export contains no users, so create one in the Keycloak admin console
+(password with **Temporary** off, plus first name, last name and email) before requesting a
+token.
 
 ## Running Locally
 
@@ -130,7 +156,8 @@ They cover:
 - [x] **Phase 3, Security:** Keycloak, OIDC, JWT bearer, per-user ownership
 - [x] **Phase 4, Quality:** ~~xUnit unit tests~~, ~~Testcontainers integration tests~~, structured
   logging, health checks
-- [ ] **Phase 5, Infrastructure:** Dockerfiles, Docker Compose for the full stack, GitHub Actions CI
+- [ ] **Phase 5, Infrastructure:** ~~Dockerfile~~, ~~Docker Compose for the full stack~~, GitHub
+  Actions CI
 - [ ] **Phase 6, Optional:** Azure Container Apps, Entra ID, Redis, OpenTelemetry, rate limiting
 - [ ] **Phase 7, Optional Frontend:** React, TypeScript, OIDC login, expense UI, charts
 
