@@ -1,13 +1,12 @@
 # Finance: Personal Expense Tracker
 
-A multi-user expense tracker REST API: log spending, categorise it, see where the money went.
-Built with ASP.NET Core 10, Clean Architecture, PostgreSQL and Keycloak. The domain is
-deliberately small (amounts in SAR; no multi-currency, accounts, budgets or transfers) so the
-engineering around it can be the interesting part.
+[![CI](https://github.com/HamadSMA/expense-tracker/actions/workflows/ci.yml/badge.svg)](https://github.com/HamadSMA/expense-tracker/actions/workflows/ci.yml)
 
-**Status:** backend complete through Phase 3 (secured API), with unit and integration tests
-from Phase 4 in place. The full stack (API, PostgreSQL, Keycloak) now runs with Docker Compose.
-Structured logging, health checks and CI are next.
+A multi-user expense tracker REST API: log spending, categorise it, see where the money went.
+Built with ASP.NET Core 10, Clean Architecture, PostgreSQL and Keycloak. The project intentionally keeps the domain small to focus on backend engineering concerns: authentication and authorization, data isolation, query composition, validation, database integration, automated testing, containerization, and CI/CD.
+
+
+**Status:** backend complete, including authentication, per-user authorization, automated unit/integration testing, Docker Compose, and GitHub Actions CI/CD. Remaining enhancements are structured logging, health checks, and a frontend as a stretch goal.
 
 ## Tech Stack
 
@@ -19,24 +18,17 @@ Structured logging, health checks and CI are next.
 | **API** | REST, OpenAPI, Scalar, RFC 7807 ProblemDetails |
 | **Architecture** | Clean Architecture, 4 projects |
 | **Testing** | xUnit, WebApplicationFactory, Testcontainers (PostgreSQL) |
-| **Infrastructure** | Docker, Docker Compose |
+| **Infrastructure** | Docker, Docker Compose, GitHub Actions, GitHub Container Registry |
 
 ## Key Features
 
-- **Per-user data isolation:** every query is scoped to the user in the JWT; no cross-user reads
-- **JWT bearer auth:** signature, issuer, audience and expiry validated against Keycloak's
-  discovery document; issuer configured, never hardcoded
-- **Filtering, sorting, pagination:** category, amount range, date range and description
-  search; sort by date, amount or created-at; paged envelope with total count
-- **Dashboard aggregation in SQL:** totals, spend by category with percentages, top expenses,
-  and spend over time with adaptive day/week/month bucketing
-- **Validation:** positive amounts, max 2 decimal places, no future dates, known category,
-  description length
-- **Consistent errors:** RFC 7807 ProblemDetails; no stack traces or database detail leaked
-- **API documentation:** OpenAPI generated from XML doc comments, browsable in Scalar with
-  bearer auth built in
-
-**Not built yet:** structured logging, health checks, CI, frontend.
+- **Secure by default:** Keycloak-issued JWTs, and every query is scoped to the signed-in
+  user, so nobody can read or change another user's data
+- **Filtering, sorting and pagination** on the expense list
+- **Dashboard aggregation in SQL:** totals, spend by category, top expenses and spend over time
+- **Validation and consistent errors:** RFC 7807 ProblemDetails, no stack traces leaked
+- **Tested against a real database:** integration tests run on PostgreSQL via Testcontainers
+- **CI/CD:** every push builds, runs all tests and publishes a Docker image
 
 ## Architecture
 
@@ -57,9 +49,7 @@ flowchart LR
 | `Finance.Application` | DTOs, validation rules, `IFinanceDbContext` |
 | `Finance.Domain` | Entities, category list; references nothing |
 
-Arrows are project references. The domain references no framework (no ASP.NET Core, no EF
-Core, no provider SDKs), so persistence and identity are swappable without touching business
-rules. Swapping Keycloak for Entra ID is a configuration change, not a code change.
+The domain references no framework or infrastructure libraries, keeping business rules independent from persistence and identity providers. Authentication and persistence concerns are isolated from the domain.
 
 ## API
 
@@ -78,21 +68,17 @@ All endpoints except `/api/categories` require `Authorization: Bearer <token>`.
 | GET | `/api/dashboard/top-expenses` | 10 largest |
 | GET | `/api/categories` | The 9 fixed categories |
 
-Status codes: `200` / `201` / `204` on success, `400` validation, `401` missing or invalid
-token, `404` not found or not yours.
 
 Full request and response documentation is served by Scalar at
 [`/scalar/v1`](http://localhost:5048/scalar/v1) when running locally.
 
 ## Running with Docker Compose
 
-Requires Docker and the EF Core CLI.
+Requires Docker.
 
 ```bash
 cp .env.example .env
 docker compose up --build -d
-dotnet ef database update --project src/Finance.Infrastructure --startup-project src/Finance.Api \
-  --connection "Host=localhost;Port=5433;Database=finance;Username=finance;Password=<POSTGRES_PASSWORD from .env>"
 ```
 
 This starts three containers:
@@ -103,24 +89,30 @@ This starts three containers:
 | `db` | `5433` | PostgreSQL 18; data kept in the `db-data` volume |
 | `keycloak` | `8080` | Imports the `finance` realm from `keycloak/finance-realm.json` on first start |
 
-The migration step creates the schema and seeds the categories; the API does not migrate on
-startup. The realm export contains no users, so create one in the Keycloak admin console
-(password with **Temporary** off, plus first name, last name and email) before requesting a
-token.
+On first start, PostgreSQL runs `database-init.sql`, which creates the schema and seeds the
+categories, so no `dotnet ef` step is needed. The script only runs against an empty volume;
+to start over, run `docker compose down -v`.
+
+### Test user
+
+The realm import also creates a demo user, `testuser` / `password`, with a complete profile,
+so you can request a token straight away. These credentials are for local use only.
+
+Request a token and call the API:
+
+```bash
+TOKEN=$(curl -s -X POST http://localhost:8080/realms/finance/protocol/openid-connect/token \
+  -d grant_type=password -d client_id=finance-web \
+  -d username=testuser -d password=password | jq -r .access_token)
+
+curl -H "Authorization: Bearer $TOKEN" http://localhost:5048/api/expenses
+```
 
 ## Running Locally
 
-Requires .NET SDK 10, PostgreSQL 14+, Docker and the EF Core CLI.
-
-```bash
-cp src/Finance.Api/appsettings.Example.json src/Finance.Api/appsettings.json
-dotnet ef database update --project src/Finance.Infrastructure --startup-project src/Finance.Api
-dotnet run --project src/Finance.Api
-```
-
-The API also needs a Keycloak realm to issue tokens. See
-[docs/local-setup.md](docs/local-setup.md) for the Keycloak setup, configuration details and
-the included REST Client and Postman test suites.
+To run the API with `dotnet run` outside Docker Compose, see
+[docs/local-setup.md](docs/local-setup.md). It covers Keycloak, configuration, the database
+and the included REST Client and Postman test suites.
 
 ## Testing
 
@@ -135,11 +127,9 @@ The integration tests need Docker running; the unit tests do not.
 | `Finance.UnitTests` | Expense validation rules in `Finance.Application`, no I/O |
 | `Finance.IntegrationTests` | The full HTTP pipeline against a real PostgreSQL database |
 
-The integration tests boot the API in memory with `WebApplicationFactory` and point it at a
-throwaway `postgres:18` container started by Testcontainers, with migrations applied on
-startup. One container is shared across the whole suite through an xUnit collection fixture.
-Keycloak is swapped for a test authentication handler that builds the user from an
-`X-Test-Sub` header, so tests can act as different users without issuing real tokens.
+The integration tests boot the API in memory with `WebApplicationFactory` against a
+throwaway PostgreSQL container started by Testcontainers. Keycloak is swapped for a test
+authentication handler, so tests can act as different users without issuing real tokens.
 
 They cover:
 
@@ -151,15 +141,14 @@ They cover:
 
 ## Roadmap
 
-- [x] **Phase 1, Core Backend:** Clean Architecture, EF Core, PostgreSQL, CRUD, ProblemDetails
-- [x] **Phase 2, Real API:** validation, filtering, sorting, pagination, dashboard aggregation
-- [x] **Phase 3, Security:** Keycloak, OIDC, JWT bearer, per-user ownership
-- [x] **Phase 4, Quality:** ~~xUnit unit tests~~, ~~Testcontainers integration tests~~, structured
-  logging, health checks
-- [ ] **Phase 5, Infrastructure:** ~~Dockerfile~~, ~~Docker Compose for the full stack~~, GitHub
-  Actions CI
-- [ ] **Phase 6, Optional:** Azure Container Apps, Entra ID, Redis, OpenTelemetry, rate limiting
-- [ ] **Phase 7, Optional Frontend:** React, TypeScript, OIDC login, expense UI, charts
+- [x] Core backend: Clean Architecture, EF Core, PostgreSQL, CRUD
+- [x] Validation, filtering, sorting, pagination, dashboard aggregation
+- [x] Security: Keycloak, OIDC, JWT bearer, per-user ownership
+- [x] Unit and integration tests
+- [x] Docker, Docker Compose and GitHub Actions CI
+- [ ] Structured logging
+- [ ] Health checks
+- [ ] Frontend (optional)
 
 ## License
 
