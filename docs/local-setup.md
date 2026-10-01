@@ -28,11 +28,12 @@ mapper adding `finance-api` to the token's `aud`.
 
 The admin console is on `http://localhost:8080` (login `admin` / `admin`).
 
-## 2. Create a Keycloak user
+## 2. Test user
 
-The realm export contains no users. In the admin console, under the `finance` realm, create a
-user with a password (**Temporary** off) and a complete profile: first name, last name and
-email. Without them, Keycloak's default *Verify Profile* action blocks token issuance with
+The realm import creates a demo user, `testuser` / `password`, ready to request tokens. To add
+more users, create them in the admin console under the `finance` realm with a password
+(**Temporary** off) and a complete profile: first name, last name and email. Without them,
+Keycloak's default *Verify Profile* action blocks token issuance with
 `400 Account is not fully set up`.
 
 ## 3. Configure the API
@@ -56,7 +57,8 @@ dotnet run --project src/Finance.Api
 Migrations create the schema and seed the 9 fixed categories. The API listens on
 `http://localhost:5048`.
 
-## Exercising the API
+
+## 5. Exercising the API
 
 - **Scalar UI:** [http://localhost:5048/scalar/v1](http://localhost:5048/scalar/v1). Paste an
   access token into the auth section and every request sent from the UI carries it
@@ -67,3 +69,4 @@ Migrations create the schema and seed the 9 fixed categories. The API listens on
   imported from the OpenAPI document
 
 Scalar and the OpenAPI document are only mapped in the Development environment.
+
