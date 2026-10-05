@@ -97,6 +97,8 @@ to start over, run `docker compose down -v`.
 
 The realm import also creates a demo user, `testuser` / `password`, with a complete profile,
 so you can request a token straight away. These credentials are for local use only.
+The realm is only imported into an empty `keycloak-data` volume; if `testuser` is missing, run
+`docker compose down -v` and start again.
 
 Request a token and call the API:
 
