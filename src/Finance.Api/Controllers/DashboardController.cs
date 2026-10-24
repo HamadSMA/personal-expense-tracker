@@ -91,15 +91,15 @@ public class DashboardController(IFinanceDbContext db) : ControllerBase
         var userId = await User.ResolveUserIdAsync(db, ct);
 
         var groups = await ScopedExpenses(query, userId)
-            .GroupBy(e => e.CategoryId)
-            .Select(g => new { CategoryId = g.Key, Amount = g.Sum(e => e.Amount) })
+            .GroupBy(e => new { e.CategoryId, e.Category.Name })
+            .Select(g => new { g.Key.Name, Amount = g.Sum(e => e.Amount) })
             .ToListAsync(ct);
 
         var total = groups.Sum(g => g.Amount);
 
         var result = groups
             .Select(g => new CategorySpending(
-                Finance.Domain.Entities.Categories.All[g.CategoryId],
+                g.Name,
                 g.Amount,
                 total == 0 ? 0 : Math.Round(g.Amount / total * 100, 1)
             ))

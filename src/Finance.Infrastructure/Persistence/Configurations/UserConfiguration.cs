@@ -1,4 +1,3 @@
-using Finance.Domain;
 using Finance.Domain.Entities;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
@@ -22,16 +21,6 @@ public class UserConfiguration : IEntityTypeConfiguration<User>
         builder.HasIndex(u => u.ExternalIdentityId).IsUnique();
 
         builder.HasIndex(u => u.Email).IsUnique();
-
-        builder.HasData(
-            new User
-            {
-                Id = DevUser.Id,
-                ExternalIdentityId = DevUser.ExternalIdentityId,
-                Email = DevUser.Email,
-                CreatedAt = new DateTime(2026, 1, 1, 0, 0, 0, DateTimeKind.Utc)
-            }
-        );
 
         builder
             .HasMany(u => u.Expenses)

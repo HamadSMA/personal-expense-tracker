@@ -69,47 +69,6 @@ public class ExpenseValidationTests
         Assert.Empty(results);
     }
 
-    [Theory]
-    [InlineData(0)]
-    [InlineData(10)]
-    [InlineData(-1)]
-    public void Category_outside_seeded_set_is_rejected(int categoryId)
-    {
-        // Arrange: category id outside 1 to 9
-        var request = new CreateExpenseRequest(
-            categoryId,
-            10.50m,
-            "desc",
-            DateOnly.FromDateTime(DateTime.UtcNow)
-        );
-
-        // Act: run the request's own Validate
-        var results = request.Validate(new ValidationContext(request)).ToList();
-
-        // Assert: at least one error
-        Assert.NotEmpty(results);
-    }
-
-    [Theory]
-    [InlineData(1)]
-    [InlineData(9)]
-    public void Category_within_seeded_set_passes(int categoryId)
-    {
-        // Arrange: category id inside 1 to 9
-        var request = new CreateExpenseRequest(
-            categoryId,
-            10.50m,
-            "desc",
-            DateOnly.FromDateTime(DateTime.UtcNow)
-        );
-
-        // Act: run the request's own Validate
-        var results = request.Validate(new ValidationContext(request)).ToList();
-
-        // Assert: no errors
-        Assert.Empty(results);
-    }
-
     [Fact]
     public void Future_date_is_rejected()
     {

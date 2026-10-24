@@ -176,6 +176,15 @@ public class ExpensesController(IFinanceDbContext db) : ControllerBase
     [HttpPost]
     public async Task<IActionResult> Create(CreateExpenseRequest request, CancellationToken ct)
     {
+        if (!await db.Categories.AnyAsync(c => c.Id == request.CategoryId, ct))
+        {
+            ModelState.AddModelError(
+                nameof(request.CategoryId),
+                $"Category {request.CategoryId} does not exist."
+            );
+            return ValidationProblem(ModelState);
+        }
+
         var userId = await User.ResolveUserIdAsync(db, ct);
 
         var now = DateTime.UtcNow;
@@ -230,6 +239,15 @@ public class ExpensesController(IFinanceDbContext db) : ControllerBase
         CancellationToken ct
     )
     {
+        if (!await db.Categories.AnyAsync(c => c.Id == request.CategoryId, ct))
+        {
+            ModelState.AddModelError(
+                nameof(request.CategoryId),
+                $"Category {request.CategoryId} does not exist."
+            );
+            return ValidationProblem(ModelState);
+        }
+
         var userId = await User.ResolveUserIdAsync(db, ct);
 
         var expense = await db.Expenses.FirstOrDefaultAsync(

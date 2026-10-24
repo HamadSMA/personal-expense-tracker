@@ -169,15 +169,6 @@ namespace Finance.Infrastructure.Migrations
                         .IsUnique();
 
                     b.ToTable("users", (string)null);
-
-                    b.HasData(
-                        new
-                        {
-                            Id = new Guid("11111111-1111-1111-1111-111111111111"),
-                            CreatedAt = new DateTime(2026, 1, 1, 0, 0, 0, 0, DateTimeKind.Utc),
-                            Email = "dev@example.com",
-                            ExternalIdentityId = "dev-user"
-                        });
                 });
 
             modelBuilder.Entity("Finance.Domain.Entities.Expense", b =>

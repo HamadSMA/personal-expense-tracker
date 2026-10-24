@@ -10,7 +10,7 @@ public record CreateExpenseRequest(
 ) : IValidatableObject
 {
     public IEnumerable<ValidationResult> Validate(ValidationContext validationContext) =>
-        ExpenseRules.Validate(CategoryId, Amount, ExpenseDate);
+        ExpenseRules.Validate(Amount, ExpenseDate);
 }
 
 public record UpdateExpenseRequest(
@@ -21,7 +21,7 @@ public record UpdateExpenseRequest(
 ) : IValidatableObject
 {
     public IEnumerable<ValidationResult> Validate(ValidationContext validationContext) =>
-        ExpenseRules.Validate(CategoryId, Amount, ExpenseDate);
+        ExpenseRules.Validate(Amount, ExpenseDate);
 }
 
 public record ExpenseResponse(
@@ -37,11 +37,7 @@ public record ExpenseResponse(
 
 internal static class ExpenseRules
 {
-    public static IEnumerable<ValidationResult> Validate(
-        int categoryId,
-        decimal amount,
-        DateOnly expenseDate
-    )
+    public static IEnumerable<ValidationResult> Validate(decimal amount, DateOnly expenseDate)
     {
         if (amount <= 0)
             yield return new ValidationResult("Amount must be greater than zero.", ["Amount"]);
@@ -50,12 +46,6 @@ internal static class ExpenseRules
             yield return new ValidationResult(
                 "Amount cannot have more than 2 decimal places.",
                 ["Amount"]
-            );
-
-        if (!Finance.Domain.Entities.Categories.All.ContainsKey(categoryId))
-            yield return new ValidationResult(
-                $"Category {categoryId} does not exist.",
-                ["CategoryId"]
             );
 
         if (expenseDate > DateOnly.FromDateTime(DateTime.UtcNow))

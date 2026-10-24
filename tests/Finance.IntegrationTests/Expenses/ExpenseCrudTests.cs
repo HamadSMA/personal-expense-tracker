@@ -12,7 +12,7 @@ public class ExpenseCrudTests
     public ExpenseCrudTests(IntegrationTestContext context)
     {
         _client = context.Factory.CreateClient();
-        _client.DefaultRequestHeaders.Add("X-Test-Sub", "dev-user");
+        _client.DefaultRequestHeaders.Add("X-Test-Sub", "crud-user");
     }
 
     [Fact]

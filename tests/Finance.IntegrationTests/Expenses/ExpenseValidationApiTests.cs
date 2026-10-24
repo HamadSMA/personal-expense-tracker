@@ -11,7 +11,7 @@ public class ExpenseValidationApiTests
     public ExpenseValidationApiTests(IntegrationTestContext context)
     {
         _client = context.Factory.CreateClient();
-        _client.DefaultRequestHeaders.Add("X-Test-Sub", "dev-user");
+        _client.DefaultRequestHeaders.Add("X-Test-Sub", "validation-user");
     }
 
     [Fact]
