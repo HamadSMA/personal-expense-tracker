@@ -39,7 +39,7 @@ Keycloak's default *Verify Profile* action blocks token issuance with
 ## 3. Configure the API
 
 ```bash
-cp src/Finance.Api/appsettings.Example.json src/Finance.Api/appsettings.json
+cp backend/src/Finance.Api/appsettings.Example.json backend/src/Finance.Api/appsettings.json
 ```
 
 Edit `ConnectionStrings:FinanceDb` to match your PostgreSQL user. The `Jwt` section already
@@ -50,8 +50,8 @@ points at the `finance` realm and the `finance-api` audience.
 ## 4. Create the database and run
 
 ```bash
-dotnet ef database update --project src/Finance.Infrastructure --startup-project src/Finance.Api
-dotnet run --project src/Finance.Api
+dotnet ef database update --project backend/src/Finance.Infrastructure --startup-project backend/src/Finance.Api
+dotnet run --project backend/src/Finance.Api
 ```
 
 Migrations create the schema and seed the 9 fixed categories. The API listens on

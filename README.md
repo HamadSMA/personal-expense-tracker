@@ -119,7 +119,7 @@ and the included REST Client and Postman test suites.
 ## Testing
 
 ```bash
-dotnet test
+dotnet test backend
 ```
 
 The integration tests need Docker running; the unit tests do not.
