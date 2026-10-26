@@ -17,6 +17,10 @@ jobs:
       contents: read
       packages: write
 
+    defaults:
+      run:
+        working-directory: backend
+
     steps:
     - uses: actions/checkout@v7
     - name: Setup .NET

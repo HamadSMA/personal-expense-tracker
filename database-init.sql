@@ -140,3 +140,22 @@ BEGIN
 END $EF$;
 COMMIT;
 
+START TRANSACTION;
+
+DO $EF$
+BEGIN
+    IF NOT EXISTS(SELECT 1 FROM "__EFMigrationsHistory" WHERE "MigrationId" = '20261021092944_RemoveDevUser') THEN
+    DELETE FROM users
+    WHERE "Id" = '11111111-1111-1111-1111-111111111111';
+    END IF;
+END $EF$;
+
+DO $EF$
+BEGIN
+    IF NOT EXISTS(SELECT 1 FROM "__EFMigrationsHistory" WHERE "MigrationId" = '20261021092944_RemoveDevUser') THEN
+    INSERT INTO "__EFMigrationsHistory" ("MigrationId", "ProductVersion")
+    VALUES ('20261021092944_RemoveDevUser', '10.0.11');
+    END IF;
+END $EF$;
+COMMIT;
+
