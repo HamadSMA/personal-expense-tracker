@@ -37,6 +37,19 @@ builder.Services.AddOpenApi(options =>
     options.AddDocumentTransformer<BearerSecuritySchemeTransformer>();
     options.AddOperationTransformer<BearerSecuritySchemeTransformer>();
 });
+
+var allowedOrigins = builder.Configuration.GetSection("Cors:AllowedOrigins").Get<string[]>() ?? [];
+
+builder.Services.AddCors(options =>
+{
+    options.AddDefaultPolicy(policy =>
+        policy
+            .WithOrigins(allowedOrigins)
+            .AllowAnyHeader()
+            .AllowAnyMethod()
+            .WithExposedHeaders("Location")
+    );
+});
 var app = builder.Build();
 
 // Configure the HTTP request pipeline.
@@ -47,6 +60,7 @@ if (app.Environment.IsDevelopment())
 }
 app.UseExceptionHandler();
 app.UseHttpsRedirection();
+app.UseCors();
 app.UseAuthentication();
 app.UseAuthorization();
 app.MapControllers();

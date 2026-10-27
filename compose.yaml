@@ -6,6 +6,7 @@ services:
     ports:
       - 5048:8080
     environment:
+      Cors__AllowedOrigins__0: http://localhost:5173
       ConnectionStrings__FinanceDb: Host=db;Port=5432;Database=${POSTGRES_DB};Username=${POSTGRES_USER};Password=${POSTGRES_PASSWORD}
       Jwt__Authority: http://keycloak:8080/realms/finance
       Jwt__Audience: finance-api
