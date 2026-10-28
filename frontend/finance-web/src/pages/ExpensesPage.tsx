@@ -1,39 +1,51 @@
-import { useEffect, useState } from "react";
-import type { Category } from "../types/category";
-import { getCategories } from "../services/categoryService";
+import { Link } from "react-router";
+import { useExpenses } from "../features/expenses/useExpenses";
+
+const sar = new Intl.NumberFormat("en-SA", { style: "currency", currency: "SAR" });
 
 function ExpensesPage() {
-  const [categories, setCategories] = useState<Category[]>([]);
-  const [isLoading, setIsLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
+  const { data, isPending, isError, error } = useExpenses();
 
-  useEffect(() => {
-    const controller = new AbortController();
+  if (isPending) {
+    return <p>Loading…</p>;
+  }
 
-    getCategories(controller.signal)
-      .then(setCategories)
-      .catch((err: unknown) => {
-        if (controller.signal.aborted) return;
-        setError(err instanceof Error ? err.message : "Failed to load categories");
-      })
-      .finally(() => {
-        if (!controller.signal.aborted) setIsLoading(false);
-      });
+  if (isError) {
+    return <p>Error: {error.message}</p>;
+  }
 
-    return () => controller.abort();
-  }, []);
+  if (data.items.length === 0) {
+    return <p>No expenses yet.</p>;
+  }
 
   return (
     <div>
       <h1>Expenses</h1>
-      <h2>Categories</h2>
-      {isLoading && <p>Loading…</p>}
-      {error && <p>{error}</p>}
-      <ul>
-        {categories.map((category) => (
-          <li key={category.id}>{category.name}</li>
-        ))}
-      </ul>
+      <table>
+        <thead>
+          <tr>
+            <th>Date</th>
+            <th>Description</th>
+            <th>Category</th>
+            <th>Amount</th>
+          </tr>
+        </thead>
+        <tbody>
+          {data.items.map((expense) => (
+            <tr key={expense.id}>
+              <td>{expense.expenseDate}</td>
+              <td>
+                <Link to={`/expenses/${expense.id}`}>{expense.description}</Link>
+              </td>
+              <td>{expense.categoryName}</td>
+              <td>{sar.format(expense.amount)}</td>
+            </tr>
+          ))}
+        </tbody>
+      </table>
+      <p>
+        Page {data.page} of {data.totalPages} ({data.totalCount} expenses)
+      </p>
     </div>
   );
 }

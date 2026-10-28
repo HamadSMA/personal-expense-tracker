@@ -1,0 +1,52 @@
+@keycloak = http://localhost:8080
+@api = http://localhost:5048
+
+### Get a token for testuser
+# @name login
+POST {{keycloak}}/realms/finance/protocol/openid-connect/token
+Content-Type: application/x-www-form-urlencoded
+
+grant_type=password&client_id=finance-web&username=testuser&password=password&scope=openid
+
+###
+@token = {{login.response.body.access_token}}
+
+### Expense 1
+POST {{api}}/api/expenses
+Authorization: Bearer {{token}}
+Content-Type: application/json
+
+{
+  "categoryId": 1,
+  "amount": 45.50,
+  "description": "Lunch",
+  "expenseDate": "2026-10-25"
+}
+
+### Expense 2
+POST {{api}}/api/expenses
+Authorization: Bearer {{token}}
+Content-Type: application/json
+
+{
+  "categoryId": 2,
+  "amount": 30.00,
+  "description": "Taxi to work",
+  "expenseDate": "2026-10-26"
+}
+
+### Expense 3
+POST {{api}}/api/expenses
+Authorization: Bearer {{token}}
+Content-Type: application/json
+
+{
+  "categoryId": 6,
+  "amount": 250.00,
+  "description": "Electricity bill",
+  "expenseDate": "2026-10-27"
+}
+
+### List expenses
+GET {{api}}/api/expenses
+Authorization: Bearer {{token}}
