@@ -1,4 +1,5 @@
 import type { ProblemDetails } from "../types/api";
+import { clearStoredUser, getAccessToken } from "../auth/getAccessToken";
 
 const baseUrl = import.meta.env.VITE_API_BASE_URL;
 
@@ -47,12 +48,24 @@ export async function apiRequest<T>(
     headers["Content-Type"] = "application/json";
   }
 
+  // Attach the access token when signed in.
+  const token = getAccessToken();
+  if (token) {
+    headers["Authorization"] = `Bearer ${token}`;
+  }
+
   const response = await fetch(url, {
     method,
     headers,
     body: body !== undefined ? JSON.stringify(body) : undefined,
     signal,
   });
+
+  // Session no longer valid: clear it and reload so RequireAuth signs in again.
+  if (response.status === 401) {
+    clearStoredUser();
+    window.location.reload();
+  }
 
   // Turn error responses into ApiError, reading ProblemDetails if the body is JSON.
   if (!response.ok) {
