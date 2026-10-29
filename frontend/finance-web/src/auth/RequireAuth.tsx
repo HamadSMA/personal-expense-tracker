@@ -8,7 +8,8 @@ export function RequireAuth() {
 
   useEffect(() => {
     if (!hasAuthParams() && !isAuthenticated && !isLoading && !activeNavigator && !error) {
-      void signinRedirect();
+      const { pathname, search, hash } = window.location;
+      void signinRedirect({ state: { returnTo: pathname + search + hash } });
     }
   }, [isAuthenticated, isLoading, activeNavigator, error, signinRedirect]);
 

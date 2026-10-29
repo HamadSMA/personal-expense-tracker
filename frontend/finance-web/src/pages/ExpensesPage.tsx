@@ -70,6 +70,7 @@ function ExpensesPage() {
   return (
     <div>
       <h1>Expenses</h1>
+      <Link to="/expenses/new">New expense</Link>
       <ExpenseFilters query={query} onApply={updateQuery} onReset={resetQuery} />
       <ExpenseSortControls
         sortBy={query.sortBy}
