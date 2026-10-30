@@ -32,7 +32,7 @@ export function getPresetRange(preset: Exclude<RangePreset, "custom">, today = n
     case "this-week": {
       const daysSinceMonday = (today.getDay() + 6) % 7;
       const monday = new Date(year, month, today.getDate() - daysSinceMonday);
-      const sunday = new Date(year, month, monday.getDate() + 6);
+      const sunday = new Date(monday.getFullYear(), monday.getMonth(), monday.getDate() + 6);
       return { from: toIsoDate(monday), to: toIsoDate(sunday) };
     }
     case "this-month":
