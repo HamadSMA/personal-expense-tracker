@@ -1,4 +1,17 @@
 services:
+  web:
+    build:
+      context: ./frontend/finance-web
+      target: final
+      args:
+        VITE_API_BASE_URL: http://localhost:5048
+        VITE_OIDC_AUTHORITY: http://localhost:8080/realms/finance
+        VITE_OIDC_CLIENT_ID: finance-web
+    ports:
+      - 5173:8080
+    depends_on:
+      - api
+
   api:
     build:
       context: ./backend
@@ -33,6 +46,7 @@ services:
       interval: 5s
       timeout: 5s
       retries: 10
+
   keycloak:
     image: quay.io/keycloak/keycloak:26.7
     command: start-dev --import-realm
@@ -46,6 +60,7 @@ services:
     volumes:
       - keycloak-data:/opt/keycloak/data
       - ./keycloak/finance-realm.json:/opt/keycloak/data/import/finance-realm.json:ro
+
 volumes:
   db-data:
   keycloak-data:

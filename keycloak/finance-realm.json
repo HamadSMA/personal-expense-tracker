@@ -755,6 +755,7 @@
       "protocol": "openid-connect",
       "attributes": {
         "realm_client": "false",
+        "post.logout.redirect.uris": "+",
         "oidc.ciba.grant.enabled": "false",
         "backchannel.logout.session.required": "true",
         "standard.token.exchange.enabled": "false",
