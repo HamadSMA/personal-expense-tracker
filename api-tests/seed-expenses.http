@@ -47,6 +47,162 @@ Content-Type: application/json
   "expenseDate": "2026-10-27"
 }
 
+### January 2026
+POST {{api}}/api/expenses
+Authorization: Bearer {{token}}
+Content-Type: application/json
+
+{
+  "categoryId": 1,
+  "amount": 45.50,
+  "description": "Groceries",
+  "expenseDate": "2026-01-12"
+}
+
+### April 2026
+POST {{api}}/api/expenses
+Authorization: Bearer {{token}}
+Content-Type: application/json
+
+{
+  "categoryId": 6,
+  "amount": 120.00,
+  "description": "Electricity bill",
+  "expenseDate": "2026-04-18"
+}
+
+### July 2026
+POST {{api}}/api/expenses
+Authorization: Bearer {{token}}
+Content-Type: application/json
+
+{
+  "categoryId": 2,
+  "amount": 65.00,
+  "description": "Taxi rides",
+  "expenseDate": "2026-07-09"
+}
+
+### September - Expense 1
+POST {{api}}/api/expenses
+Authorization: Bearer {{token}}
+Content-Type: application/json
+
+{
+  "categoryId": 1,
+  "amount": 82.75,
+  "description": "Weekly groceries",
+  "expenseDate": "2026-09-05"
+}
+
+### September - Expense 2
+POST {{api}}/api/expenses
+Authorization: Bearer {{token}}
+Content-Type: application/json
+
+{
+  "categoryId": 2,
+  "amount": 32.50,
+  "description": "Public transport",
+  "expenseDate": "2026-09-14"
+}
+
+### September - Expense 3
+POST {{api}}/api/expenses
+Authorization: Bearer {{token}}
+Content-Type: application/json
+
+{
+  "categoryId": 6,
+  "amount": 175.00,
+  "description": "Electricity bill",
+  "expenseDate": "2026-09-25"
+}
+
+### October - Expense 1
+POST {{api}}/api/expenses
+Authorization: Bearer {{token}}
+Content-Type: application/json
+
+{
+  "categoryId": 1,
+  "amount": 58.90,
+  "description": "Supermarket shopping",
+  "expenseDate": "2026-10-02"
+}
+
+### October - Expense 2
+POST {{api}}/api/expenses
+Authorization: Bearer {{token}}
+Content-Type: application/json
+
+{
+  "categoryId": 2,
+  "amount": 24.99,
+  "description": "Bus and train tickets",
+  "expenseDate": "2026-10-07"
+}
+
+### October - Expense 3
+POST {{api}}/api/expenses
+Authorization: Bearer {{token}}
+Content-Type: application/json
+
+{
+  "categoryId": 6,
+  "amount": 210.00,
+  "description": "Utility bill",
+  "expenseDate": "2026-10-12"
+}
+
+### October - Expense 4
+POST {{api}}/api/expenses
+Authorization: Bearer {{token}}
+Content-Type: application/json
+
+{
+  "categoryId": 1,
+  "amount": 89.00,
+  "description": "Restaurant dinner",
+  "expenseDate": "2026-10-18"
+}
+
+### October - Expense 5
+POST {{api}}/api/expenses
+Authorization: Bearer {{token}}
+Content-Type: application/json
+
+{
+  "categoryId": 1,
+  "amount": 73.25,
+  "description": "Weekly groceries",
+  "expenseDate": "2026-10-23"
+}
+
+### October - Expense 6
+POST {{api}}/api/expenses
+Authorization: Bearer {{token}}
+Content-Type: application/json
+
+{
+  "categoryId": 2,
+  "amount": 30.00,
+  "description": "Taxi to work",
+  "expenseDate": "2026-10-26"
+}
+
+### October - Expense 7
+POST {{api}}/api/expenses
+Authorization: Bearer {{token}}
+Content-Type: application/json
+
+{
+  "categoryId": 6,
+  "amount": 250.00,
+  "description": "Electricity bill",
+  "expenseDate": "2026-10-27"
+}
+
 ### List expenses
 GET {{api}}/api/expenses
 Authorization: Bearer {{token}}

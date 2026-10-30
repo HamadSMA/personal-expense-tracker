@@ -4,8 +4,7 @@ import { useExpenseQueryParams } from "../features/expenses/useExpenseQueryParam
 import ExpenseFilters from "../features/expenses/ExpenseFilters";
 import ExpenseSortControls from "../features/expenses/ExpenseSortControls";
 import ExpensePagination from "../features/expenses/ExpensePagination";
-
-const sar = new Intl.NumberFormat("en-SA", { style: "currency", currency: "SAR" });
+import { formatSar } from "../utils/formatSar";
 
 function ExpensesPage() {
   const { query, updateQuery, resetQuery } = useExpenseQueryParams();
@@ -51,7 +50,7 @@ function ExpensesPage() {
                   <Link to={`/expenses/${expense.id}`}>{expense.description}</Link>
                 </td>
                 <td>{expense.categoryName}</td>
-                <td>{sar.format(expense.amount)}</td>
+                <td>{formatSar(expense.amount)}</td>
               </tr>
             ))}
           </tbody>

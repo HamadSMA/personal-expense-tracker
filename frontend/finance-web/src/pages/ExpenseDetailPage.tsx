@@ -2,8 +2,7 @@ import { Link, useNavigate, useParams } from "react-router";
 import { useDeleteExpense } from "../features/expenses/useExpenseMutations";
 import { useExpense } from "../features/expenses/useExpenses";
 import { ApiError } from "../services/apiClient";
-
-const sar = new Intl.NumberFormat("en-SA", { style: "currency", currency: "SAR" });
+import { formatSar } from "../utils/formatSar";
 
 function ExpenseDetailPage() {
   const { id } = useParams();
@@ -35,7 +34,7 @@ function ExpenseDetailPage() {
 
       <dl>
         <dt>Amount</dt>
-        <dd>{sar.format(data.amount)}</dd>
+        <dd>{formatSar(data.amount)}</dd>
         <dt>Category</dt>
         <dd>{data.categoryName}</dd>
         <dt>Date</dt>
