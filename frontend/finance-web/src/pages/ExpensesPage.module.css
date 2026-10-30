@@ -1,0 +1,62 @@
+.panel {
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-md);
+  background: var(--color-surface);
+}
+
+.filters {
+  padding: var(--space-3) var(--space-4) var(--space-4);
+  border-bottom: 1px solid var(--color-border);
+  border-radius: var(--radius-md) var(--radius-md) 0 0;
+  background: var(--color-surface-muted);
+}
+
+.toolbar {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-3);
+  padding: var(--space-2) var(--space-4);
+  border-bottom: 1px solid var(--color-border);
+}
+
+.updating {
+  color: var(--color-text-faint);
+  font-size: var(--font-size-sm);
+}
+
+.state {
+  padding: 0 var(--space-4);
+}
+
+.date {
+  width: 7.5rem;
+  color: var(--color-text-muted);
+  white-space: nowrap;
+  font-variant-numeric: tabular-nums;
+}
+
+.description {
+  max-width: 28rem;
+  overflow-wrap: anywhere;
+}
+
+.amount {
+  font-weight: 500;
+}
+
+.actions {
+  width: 1px;
+  white-space: nowrap;
+}
+
+.actions > * + * {
+  margin-left: var(--space-1);
+}
+
+.action {
+  min-height: 1.75rem;
+  padding: 0 var(--space-2);
+  font-size: var(--font-size-sm);
+}

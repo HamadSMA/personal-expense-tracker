@@ -1,19 +1,12 @@
-import { Cell, Legend, Pie, PieChart, ResponsiveContainer, Tooltip } from "recharts";
+import { Cell, Pie, PieChart, ResponsiveContainer, Tooltip } from "recharts";
+import Card from "../../components/Card";
+import StatusMessage from "../../components/StatusMessage";
 import type { DateRange } from "../../types/dashboard";
+import { getCategoryColor } from "../../utils/categoryColors";
 import { formatSar } from "../../utils/formatSar";
+import { tooltipContentStyle, tooltipItemStyle, tooltipLabelStyle } from "./chartStyles";
 import { useSpendingByCategory } from "./useDashboard";
-
-const categoryColors: Record<string, string> = {
-  Food: "#4e79a7",
-  Transport: "#f28e2b",
-  Housing: "#e15759",
-  Shopping: "#76b7b2",
-  Entertainment: "#59a14f",
-  Bills: "#edc948",
-  Healthcare: "#b07aa1",
-  Travel: "#ff9da7",
-  Other: "#9c755f",
-};
+import styles from "./CategoryChart.module.css";
 
 type CategoryChartProps = {
   range: DateRange;
@@ -22,43 +15,64 @@ type CategoryChartProps = {
 export default function CategoryChart({ range }: CategoryChartProps) {
   const { data, isPending, isError, error } = useSpendingByCategory(range);
 
-  return (
-    <section>
-      <h2>Spending by category</h2>
-      {isPending ? (
-        <p>Loading…</p>
-      ) : isError ? (
-        <p role="alert">Could not load categories: {error.message}</p>
-      ) : data.length === 0 ? (
-        <p>No spending in this range.</p>
-      ) : (
-        <>
-          <ResponsiveContainer width="100%" height={300}>
+  function renderContent() {
+    if (isPending) {
+      return <StatusMessage variant="loading">Loading…</StatusMessage>;
+    }
+
+    if (isError) {
+      return <StatusMessage variant="error">Could not load categories: {error.message}</StatusMessage>;
+    }
+
+    if (data.length === 0) {
+      return <StatusMessage variant="empty">No spending in this range.</StatusMessage>;
+    }
+
+    return (
+      <div className={styles.layout}>
+        <div className={styles.chart}>
+          <ResponsiveContainer width="100%" height={160}>
             <PieChart>
               <Pie
                 data={data}
                 dataKey="amount"
                 nameKey="category"
-                innerRadius={60}
-                outerRadius={100}
+                innerRadius={54}
+                outerRadius={76}
+                paddingAngle={1.5}
+                stroke="none"
+                isAnimationActive={false}
               >
                 {data.map((item) => (
-                  <Cell key={item.category} fill={categoryColors[item.category] ?? "#bab0ac"} />
+                  <Cell key={item.category} fill={getCategoryColor(item.category)} />
                 ))}
               </Pie>
-              <Tooltip formatter={(value) => (typeof value === "number" ? formatSar(value) : value)} />
-              <Legend />
+              <Tooltip
+                contentStyle={tooltipContentStyle}
+                labelStyle={tooltipLabelStyle}
+                itemStyle={tooltipItemStyle}
+                formatter={(value) => (typeof value === "number" ? formatSar(value) : value)}
+              />
             </PieChart>
           </ResponsiveContainer>
-          <ul>
-            {data.map((item) => (
-              <li key={item.category}>
-                {item.category}: {formatSar(item.amount)} ({item.percentage}%)
-              </li>
-            ))}
-          </ul>
-        </>
-      )}
-    </section>
-  );
+        </div>
+        <ul className={styles.legend}>
+          {data.map((item) => (
+            <li key={item.category} className={styles.item}>
+              <span
+                className={styles.swatch}
+                style={{ background: getCategoryColor(item.category) }}
+                aria-hidden="true"
+              />
+              <span className={styles.name}>{item.category}</span>
+              <span className={styles.percentage}>{item.percentage}%</span>
+              <span className={styles.amount}>{formatSar(item.amount)}</span>
+            </li>
+          ))}
+        </ul>
+      </div>
+    );
+  }
+
+  return <Card title="Spending by category">{renderContent()}</Card>;
 }

@@ -1,4 +1,5 @@
 import type { ExpenseQuery, ExpenseSortBy, SortDirection } from "../../types/expense";
+import styles from "./ExpenseSortControls.module.css";
 
 type ExpenseSortControlsProps = {
   sortBy: ExpenseSortBy | undefined;
@@ -23,8 +24,8 @@ export default function ExpenseSortControls({
   onChange,
 }: ExpenseSortControlsProps) {
   return (
-    <div>
-      <label>
+    <div className={styles.controls}>
+      <label className={styles.field}>
         Sort by
         <select
           value={sortBy ?? "expenseDate"}
@@ -41,7 +42,7 @@ export default function ExpenseSortControls({
         </select>
       </label>
 
-      <label>
+      <label className={styles.field}>
         Direction
         <select
           value={sortDirection ?? "desc"}

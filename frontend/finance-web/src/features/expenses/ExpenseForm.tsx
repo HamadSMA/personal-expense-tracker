@@ -1,8 +1,10 @@
 import { useState } from "react";
+import { Link } from "react-router";
 import { ApiError } from "../../services/apiClient";
 import type { ValidationProblemDetails } from "../../types/api";
 import type { SaveExpenseRequest } from "../../types/expense";
 import { useCategories } from "./useCategories";
+import styles from "./ExpenseForm.module.css";
 
 type Field = "categoryId" | "amount" | "description" | "expenseDate";
 type FieldErrors = Partial<Record<Field, string>>;
@@ -11,6 +13,7 @@ type FormValues = Record<Field, string>;
 interface ExpenseFormProps {
   initialValues?: SaveExpenseRequest;
   submitLabel: string;
+  cancelTo?: string;
   onSubmit: (request: SaveExpenseRequest) => Promise<unknown>;
 }
 
@@ -73,15 +76,38 @@ function mapServerErrors(problem: ValidationProblemDetails) {
   return { fieldErrors, otherErrors };
 }
 
-export default function ExpenseForm({ initialValues, submitLabel, onSubmit }: ExpenseFormProps) {
+function errorId(field: Field) {
+  return `${field}-error`;
+}
+
+export default function ExpenseForm({ initialValues, submitLabel, cancelTo, onSubmit }: ExpenseFormProps) {
   const categories = useCategories();
   const [fieldErrors, setFieldErrors] = useState<FieldErrors>({});
   const [formErrors, setFormErrors] = useState<string[]>([]);
   const [isSubmitting, setIsSubmitting] = useState(false);
 
+  function fieldProps(field: Field) {
+    return {
+      "aria-invalid": fieldErrors[field] ? true : undefined,
+      "aria-describedby": fieldErrors[field] ? errorId(field) : undefined,
+    };
+  }
+
+  function renderError(field: Field) {
+    const message = fieldErrors[field];
+    return (
+      message && (
+        <p id={errorId(field)} role="alert" className={styles.fieldError}>
+          {message}
+        </p>
+      )
+    );
+  }
+
   return (
     <form
       noValidate
+      className={styles.form}
       onSubmit={async (event) => {
         event.preventDefault();
         const data = new FormData(event.currentTarget);
@@ -119,21 +145,69 @@ export default function ExpenseForm({ initialValues, submitLabel, onSubmit }: Ex
       }}
     >
       {formErrors.length > 0 && (
-        <ul role="alert">
+        <ul role="alert" className={styles.formErrors}>
           {formErrors.map((message) => (
             <li key={message}>{message}</li>
           ))}
         </ul>
       )}
 
-      <div>
+      <div className={`${styles.field} ${styles.wide}`}>
+        <label htmlFor="description">Description</label>
+        <input
+          id="description"
+          name="description"
+          type="text"
+          maxLength={maxDescriptionLength}
+          placeholder="What was it for?"
+          defaultValue={initialValues?.description ?? ""}
+          {...fieldProps("description")}
+        />
+        {renderError("description")}
+      </div>
+
+      <div className={styles.field}>
+        <label htmlFor="amount">Amount</label>
+        <div className={styles.affix}>
+          <input
+            id="amount"
+            name="amount"
+            type="number"
+            inputMode="decimal"
+            step="0.01"
+            min="0.01"
+            placeholder="0.00"
+            defaultValue={initialValues ? initialValues.amount.toFixed(2) : ""}
+            {...fieldProps("amount")}
+          />
+          <span className={styles.suffix} aria-hidden="true">
+            SAR
+          </span>
+        </div>
+        {renderError("amount")}
+      </div>
+
+      <div className={styles.field}>
+        <label htmlFor="expenseDate">Date</label>
+        <input
+          id="expenseDate"
+          name="expenseDate"
+          type="date"
+          max={todayUtc()}
+          defaultValue={initialValues?.expenseDate ?? todayUtc()}
+          {...fieldProps("expenseDate")}
+        />
+        {renderError("expenseDate")}
+      </div>
+
+      <div className={`${styles.field} ${styles.wide}`}>
         <label htmlFor="categoryId">Category</label>
         <select
           id="categoryId"
           name="categoryId"
           defaultValue={initialValues?.categoryId ?? ""}
           disabled={categories.isPending}
-          aria-invalid={fieldErrors.categoryId ? true : undefined}
+          {...fieldProps("categoryId")}
         >
           <option value="">
             {categories.isPending ? "Loading categories…" : "Select a category"}
@@ -144,54 +218,24 @@ export default function ExpenseForm({ initialValues, submitLabel, onSubmit }: Ex
             </option>
           ))}
         </select>
-        {categories.isError && <p role="alert">Could not load categories.</p>}
-        {fieldErrors.categoryId && <p role="alert">{fieldErrors.categoryId}</p>}
+        {categories.isError && (
+          <p role="alert" className={styles.fieldError}>
+            Could not load categories.
+          </p>
+        )}
+        {renderError("categoryId")}
       </div>
 
-      <div>
-        <label htmlFor="amount">Amount (SAR)</label>
-        <input
-          id="amount"
-          name="amount"
-          type="number"
-          inputMode="decimal"
-          step="0.01"
-          min="0.01"
-          defaultValue={initialValues ? initialValues.amount.toFixed(2) : ""}
-          aria-invalid={fieldErrors.amount ? true : undefined}
-        />
-        {fieldErrors.amount && <p role="alert">{fieldErrors.amount}</p>}
+      <div className={styles.actions}>
+        {cancelTo && (
+          <Link to={cancelTo} className="btn btn-ghost">
+            Cancel
+          </Link>
+        )}
+        <button type="submit" className="btn btn-accent" disabled={isSubmitting}>
+          {isSubmitting ? "Saving…" : submitLabel}
+        </button>
       </div>
-
-      <div>
-        <label htmlFor="description">Description</label>
-        <input
-          id="description"
-          name="description"
-          type="text"
-          maxLength={maxDescriptionLength}
-          defaultValue={initialValues?.description ?? ""}
-          aria-invalid={fieldErrors.description ? true : undefined}
-        />
-        {fieldErrors.description && <p role="alert">{fieldErrors.description}</p>}
-      </div>
-
-      <div>
-        <label htmlFor="expenseDate">Date</label>
-        <input
-          id="expenseDate"
-          name="expenseDate"
-          type="date"
-          max={todayUtc()}
-          defaultValue={initialValues?.expenseDate ?? todayUtc()}
-          aria-invalid={fieldErrors.expenseDate ? true : undefined}
-        />
-        {fieldErrors.expenseDate && <p role="alert">{fieldErrors.expenseDate}</p>}
-      </div>
-
-      <button type="submit" disabled={isSubmitting}>
-        {isSubmitting ? "Saving…" : submitLabel}
-      </button>
     </form>
   );
 }

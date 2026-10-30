@@ -1,6 +1,10 @@
-import { Bar, BarChart, CartesianGrid, ResponsiveContainer, Tooltip, XAxis, YAxis } from "recharts";
+import { Bar, BarChart, Cell, ResponsiveContainer, Tooltip, XAxis, YAxis } from "recharts";
+import Card from "../../components/Card";
+import StatusMessage from "../../components/StatusMessage";
 import type { DateRange } from "../../types/dashboard";
+import { getCategoryColor } from "../../utils/categoryColors";
 import { formatSar } from "../../utils/formatSar";
+import { axisTick, tooltipContentStyle, tooltipItemStyle, tooltipLabelStyle } from "./chartStyles";
 import { useSpendingByCategory } from "./useDashboard";
 
 const maxCategories = 5;
@@ -14,39 +18,53 @@ export default function TopCategoriesChart({ range }: TopCategoriesChartProps) {
 
   function renderContent() {
     if (isPending) {
-      return <p>Loading…</p>;
+      return <StatusMessage variant="loading">Loading…</StatusMessage>;
     }
 
     if (isError) {
-      return <p role="alert">Could not load top categories: {error.message}</p>;
+      return <StatusMessage variant="error">Could not load top categories: {error.message}</StatusMessage>;
     }
 
     if (data.length === 0) {
-      return <p>No spending in this range.</p>;
+      return <StatusMessage variant="empty">No spending in this range.</StatusMessage>;
     }
 
     const top = data.slice(0, maxCategories);
 
     return (
-      <ResponsiveContainer width="100%" height={top.length * 50 + 40}>
-        <BarChart data={top} layout="vertical" margin={{ left: 20 }}>
-          <CartesianGrid strokeDasharray="3 3" horizontal={false} />
+      <ResponsiveContainer width="100%" height={top.length * 36 + 28}>
+        <BarChart data={top} layout="vertical" margin={{ top: 0, right: 8, bottom: 0, left: 0 }}>
           <XAxis
             type="number"
+            axisLine={false}
+            tickLine={false}
+            tick={axisTick}
             tickFormatter={(value) => Number(value).toLocaleString("en-US", { notation: "compact" })}
           />
-          <YAxis type="category" dataKey="category" width={100} />
-          <Tooltip formatter={(value) => (typeof value === "number" ? formatSar(value) : value)} />
-          <Bar dataKey="amount" name="Spending" fill="#4e79a7" />
+          <YAxis
+            type="category"
+            dataKey="category"
+            axisLine={false}
+            tickLine={false}
+            tick={{ ...axisTick, fill: "#6e6d69", fontSize: 12 }}
+            width={96}
+          />
+          <Tooltip
+            cursor={{ fill: "var(--color-surface-muted)" }}
+            contentStyle={tooltipContentStyle}
+            labelStyle={tooltipLabelStyle}
+            itemStyle={tooltipItemStyle}
+            formatter={(value) => (typeof value === "number" ? formatSar(value) : value)}
+          />
+          <Bar dataKey="amount" name="Spending" radius={[0, 3, 3, 0]} barSize={14} isAnimationActive={false}>
+            {top.map((item) => (
+              <Cell key={item.category} fill={getCategoryColor(item.category)} />
+            ))}
+          </Bar>
         </BarChart>
       </ResponsiveContainer>
     );
   }
 
-  return (
-    <section>
-      <h2>Top categories</h2>
-      {renderContent()}
-    </section>
-  );
+  return <Card title="Top categories">{renderContent()}</Card>;
 }

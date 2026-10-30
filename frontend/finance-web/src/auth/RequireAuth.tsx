@@ -1,6 +1,8 @@
 import { useEffect } from "react";
 import { Outlet } from "react-router";
 import { hasAuthParams, useAuth } from "react-oidc-context";
+import StatusMessage from "../components/StatusMessage";
+import styles from "./RequireAuth.module.css";
 
 export function RequireAuth() {
   const auth = useAuth();
@@ -14,11 +16,35 @@ export function RequireAuth() {
   }, [isAuthenticated, isLoading, activeNavigator, error, signinRedirect]);
 
   if (error) {
-    return <p>Sign-in failed: {error.message}</p>;
+    return (
+      <div className={styles.screen}>
+        <div className={styles.panel}>
+          <p className={styles.brand}>
+            <span className={styles.logo} aria-hidden="true">
+              E
+            </span>
+            Expense Tracker
+          </p>
+          <StatusMessage variant="error">Sign-in failed: {error.message}</StatusMessage>
+        </div>
+      </div>
+    );
   }
 
   if (!isAuthenticated) {
-    return <p>Signing in…</p>;
+    return (
+      <div className={styles.screen}>
+        <div className={styles.panel}>
+          <p className={styles.brand}>
+            <span className={styles.logo} aria-hidden="true">
+              E
+            </span>
+            Expense Tracker
+          </p>
+          <StatusMessage variant="loading">Signing in…</StatusMessage>
+        </div>
+      </div>
+    );
   }
 
   return <Outlet />;

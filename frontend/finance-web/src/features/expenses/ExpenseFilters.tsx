@@ -1,5 +1,7 @@
+import Icon from "../../components/Icon";
 import type { ExpenseQuery } from "../../types/expense";
 import { useCategories } from "./useCategories";
+import styles from "./ExpenseFilters.module.css";
 
 type ExpenseFiltersProps = {
   query: ExpenseQuery;
@@ -34,6 +36,7 @@ export default function ExpenseFilters({ query, onApply, onReset }: ExpenseFilte
   return (
     <form
       key={formKey}
+      className={styles.form}
       onSubmit={(event) => {
         event.preventDefault();
         const data = new FormData(event.currentTarget);
@@ -47,12 +50,20 @@ export default function ExpenseFilters({ query, onApply, onReset }: ExpenseFilte
         });
       }}
     >
-      <label>
+      <label className={`${styles.field} ${styles.search}`}>
         Search
-        <input type="search" name="search" defaultValue={query.search ?? ""} />
+        <span className={styles.searchInput}>
+          <Icon name="search" />
+          <input
+            type="search"
+            name="search"
+            placeholder="Description"
+            defaultValue={query.search ?? ""}
+          />
+        </span>
       </label>
 
-      <label>
+      <label className={styles.field}>
         Category
         <select name="categoryId" defaultValue={query.categoryId?.toString() ?? ""}>
           <option value="">All categories</option>
@@ -64,17 +75,17 @@ export default function ExpenseFilters({ query, onApply, onReset }: ExpenseFilte
         </select>
       </label>
 
-      <label>
+      <label className={styles.field}>
         From
         <input type="date" name="fromDate" defaultValue={query.fromDate ?? ""} />
       </label>
 
-      <label>
+      <label className={styles.field}>
         To
         <input type="date" name="toDate" defaultValue={query.toDate ?? ""} />
       </label>
 
-      <label>
+      <label className={`${styles.field} ${styles.amount}`}>
         Min (SAR)
         <input
           type="number"
@@ -85,7 +96,7 @@ export default function ExpenseFilters({ query, onApply, onReset }: ExpenseFilte
         />
       </label>
 
-      <label>
+      <label className={`${styles.field} ${styles.amount}`}>
         Max (SAR)
         <input
           type="number"
@@ -96,10 +107,14 @@ export default function ExpenseFilters({ query, onApply, onReset }: ExpenseFilte
         />
       </label>
 
-      <button type="submit">Apply</button>
-      <button type="button" onClick={onReset}>
-        Clear
-      </button>
+      <div className={styles.actions}>
+        <button type="button" className="btn btn-ghost" onClick={onReset}>
+          Clear
+        </button>
+        <button type="submit" className="btn">
+          Apply
+        </button>
+      </div>
     </form>
   );
 }

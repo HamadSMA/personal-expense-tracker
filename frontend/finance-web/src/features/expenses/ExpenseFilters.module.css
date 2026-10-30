@@ -1,0 +1,63 @@
+.form {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-end;
+  gap: var(--space-3);
+}
+
+.field {
+  display: flex;
+  flex: 1 1 8.5rem;
+  flex-direction: column;
+  gap: var(--space-1);
+  min-width: 0;
+}
+
+.search {
+  flex: 2 1 14rem;
+}
+
+.amount {
+  flex: 1 1 6.5rem;
+}
+
+.searchInput {
+  position: relative;
+  display: flex;
+  align-items: center;
+}
+
+.searchInput svg {
+  position: absolute;
+  left: var(--space-2);
+  color: var(--color-text-faint);
+  pointer-events: none;
+}
+
+.searchInput input {
+  padding-left: 1.75rem;
+}
+
+.actions {
+  display: flex;
+  gap: var(--space-2);
+}
+
+@media (max-width: 560px) {
+  .field,
+  .search {
+    flex-basis: calc(50% - var(--space-3));
+  }
+
+  .search {
+    flex-basis: 100%;
+  }
+
+  .actions {
+    width: 100%;
+  }
+
+  .actions > * {
+    flex: 1;
+  }
+}

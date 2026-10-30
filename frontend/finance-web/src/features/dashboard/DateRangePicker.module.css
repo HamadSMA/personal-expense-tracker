@@ -1,0 +1,53 @@
+.picker,
+.custom {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-end;
+  gap: var(--space-2);
+}
+
+.custom {
+  padding-right: var(--space-2);
+  border-right: 1px solid var(--color-border);
+}
+
+.field {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-1);
+}
+
+.field select,
+.field input {
+  width: auto;
+  min-width: 9rem;
+}
+
+.error {
+  flex-basis: 100%;
+  color: var(--color-danger);
+  font-size: var(--font-size-sm);
+}
+
+@media (max-width: 560px) {
+  .picker,
+  .custom {
+    width: 100%;
+  }
+
+  .custom {
+    order: 1;
+    padding-right: 0;
+    border-right: none;
+  }
+
+  .field {
+    flex: 1 1 40%;
+  }
+
+  .field select,
+  .field input,
+  .custom button {
+    width: 100%;
+  }
+}

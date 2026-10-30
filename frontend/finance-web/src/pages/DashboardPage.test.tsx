@@ -87,7 +87,7 @@ describe("DashboardPage", () => {
     expect(screen.getByRole("heading", { name: "Spending over time" })).toBeInTheDocument();
     expect(screen.getByRole("heading", { name: "Top categories" })).toBeInTheDocument();
     expect(screen.getByRole("heading", { name: "Top expenses" })).toBeInTheDocument();
-    expect(screen.getByText(/Food: .*\(100%\)/)).toBeInTheDocument();
+    expect(screen.getByText("100%")).toBeInTheDocument();
   });
 
   it("shows empty states for a range with no expenses", async () => {

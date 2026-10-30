@@ -1,41 +1,70 @@
+import type { ReactNode } from "react";
+import StatusMessage from "../../components/StatusMessage";
 import type { DateRange } from "../../types/dashboard";
 import { formatSar } from "../../utils/formatSar";
 import { useDashboardSummary } from "./useDashboard";
+import styles from "./SummaryCards.module.css";
 
 type SummaryCardsProps = {
   range: DateRange;
 };
 
+function Strip({ children }: { children: ReactNode }) {
+  return (
+    <section aria-label="Summary" className={styles.strip}>
+      {children}
+    </section>
+  );
+}
+
 export default function SummaryCards({ range }: SummaryCardsProps) {
   const { data, isPending, isError, error } = useDashboardSummary(range);
 
   if (isPending) {
-    return <p>Loading summary…</p>;
+    return (
+      <Strip>
+        <div className={styles.state}>
+          <StatusMessage variant="loading">Loading summary…</StatusMessage>
+        </div>
+      </Strip>
+    );
   }
 
   if (isError) {
-    return <p role="alert">Could not load summary: {error.message}</p>;
+    return (
+      <Strip>
+        <div className={styles.state}>
+          <StatusMessage variant="error">Could not load summary: {error.message}</StatusMessage>
+        </div>
+      </Strip>
+    );
   }
 
   if (data.expenseCount === 0) {
-    return <p>No expenses in this range.</p>;
+    return (
+      <Strip>
+        <StatusMessage variant="empty">No expenses in this range.</StatusMessage>
+      </Strip>
+    );
   }
 
-  const cards = [
+  const stats = [
     { label: "Total spending", value: formatSar(data.totalSpending) },
-    { label: "Number of expenses", value: data.expenseCount.toLocaleString() },
+    { label: "Expenses", value: data.expenseCount.toLocaleString() },
     { label: "Average expense", value: formatSar(data.averageExpense) },
     { label: "Largest expense", value: formatSar(data.largestExpense) },
   ];
 
   return (
-    <section aria-label="Summary">
-      {cards.map((card) => (
-        <div key={card.label}>
-          <h3>{card.label}</h3>
-          <p>{card.value}</p>
-        </div>
-      ))}
-    </section>
+    <Strip>
+      <dl className={styles.grid}>
+        {stats.map((stat) => (
+          <div key={stat.label} className={styles.stat}>
+            <dt className={styles.label}>{stat.label}</dt>
+            <dd className={styles.value}>{stat.value}</dd>
+          </div>
+        ))}
+      </dl>
+    </Strip>
   );
 }

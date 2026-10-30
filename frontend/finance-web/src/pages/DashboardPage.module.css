@@ -1,0 +1,32 @@
+.charts {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: var(--space-4);
+}
+
+.wide {
+  display: flex;
+  grid-column: 1 / -1;
+  flex-direction: column;
+  min-width: 0;
+}
+
+.wide > * {
+  flex: 1;
+}
+
+@media (max-width: 860px) {
+  .charts {
+    grid-template-columns: minmax(0, 1fr);
+  }
+}
+
+.page :global(.recharts-cartesian-grid line) {
+  stroke: var(--color-border);
+}
+
+.page :global(.recharts-surface:focus),
+.page :global(.recharts-wrapper:focus),
+.page :global(.recharts-sector:focus) {
+  outline: none;
+}

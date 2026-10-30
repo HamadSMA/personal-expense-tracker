@@ -14,13 +14,26 @@ export const router = createBrowserRouter([
       {
         path: "/",
         element: <AppLayout />,
+        handle: { crumb: "Dashboard" },
         children: [
           { index: true, element: <DashboardPage /> },
-          { path: "expenses", element: <ExpensesPage /> },
-          { path: "expenses/new", element: <ExpenseFormPage /> },
-          { path: "expenses/:id", element: <ExpenseDetailPage /> },
-          { path: "expenses/:id/edit", element: <ExpenseFormPage /> },
-          { path: "*", element: <NotFoundPage /> },
+          {
+            path: "expenses",
+            handle: { crumb: "Expenses" },
+            children: [
+              { index: true, element: <ExpensesPage /> },
+              { path: "new", element: <ExpenseFormPage />, handle: { crumb: "New expense" } },
+              {
+                path: ":id",
+                handle: { crumb: "Expense" },
+                children: [
+                  { index: true, element: <ExpenseDetailPage /> },
+                  { path: "edit", element: <ExpenseFormPage />, handle: { crumb: "Edit" } },
+                ],
+              },
+            ],
+          },
+          { path: "*", element: <NotFoundPage />, handle: { crumb: "Not found" } },
         ],
       },
     ],

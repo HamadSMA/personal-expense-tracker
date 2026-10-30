@@ -1,0 +1,14 @@
+.state {
+  padding: 0 var(--space-4);
+}
+
+.date {
+  width: 7.5rem;
+  color: var(--color-text-muted);
+  white-space: nowrap;
+  font-variant-numeric: tabular-nums;
+}
+
+.amount {
+  font-weight: 500;
+}

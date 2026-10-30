@@ -1,7 +1,12 @@
 import { Link } from "react-router";
+import Card from "../../components/Card";
+import CategoryLabel from "../../components/CategoryLabel";
+import StatusMessage from "../../components/StatusMessage";
 import type { DateRange } from "../../types/dashboard";
+import { formatDate } from "../../utils/formatDate";
 import { formatSar } from "../../utils/formatSar";
 import { useTopExpenses } from "./useDashboard";
+import styles from "./TopExpensesList.module.css";
 
 type TopExpensesListProps = {
   range: DateRange;
@@ -12,47 +17,58 @@ export default function TopExpensesList({ range }: TopExpensesListProps) {
 
   function renderContent() {
     if (isPending) {
-      return <p>Loading…</p>;
+      return (
+        <div className={styles.state}>
+          <StatusMessage variant="loading">Loading…</StatusMessage>
+        </div>
+      );
     }
 
     if (isError) {
-      return <p role="alert">Could not load top expenses: {error.message}</p>;
+      return (
+        <div className={styles.state}>
+          <StatusMessage variant="error">Could not load top expenses: {error.message}</StatusMessage>
+        </div>
+      );
     }
 
     if (data.length === 0) {
-      return <p>No expenses in this range.</p>;
+      return <StatusMessage variant="empty">No expenses in this range.</StatusMessage>;
     }
 
     return (
-      <table>
-        <thead>
-          <tr>
-            <th>Date</th>
-            <th>Description</th>
-            <th>Category</th>
-            <th>Amount</th>
-          </tr>
-        </thead>
-        <tbody>
-          {data.map((expense) => (
-            <tr key={expense.id}>
-              <td>{expense.expenseDate}</td>
-              <td>
-                <Link to={`/expenses/${expense.id}`}>{expense.description}</Link>
-              </td>
-              <td>{expense.category}</td>
-              <td>{formatSar(expense.amount)}</td>
+      <div className="table-wrap">
+        <table>
+          <thead>
+            <tr>
+              <th>Date</th>
+              <th>Description</th>
+              <th>Category</th>
+              <th className="num">Amount</th>
             </tr>
-          ))}
-        </tbody>
-      </table>
+          </thead>
+          <tbody>
+            {data.map((expense) => (
+              <tr key={expense.id}>
+                <td className={styles.date}>{formatDate(expense.expenseDate)}</td>
+                <td>
+                  <Link to={`/expenses/${expense.id}`}>{expense.description}</Link>
+                </td>
+                <td>
+                  <CategoryLabel name={expense.category} />
+                </td>
+                <td className={`num ${styles.amount}`}>{formatSar(expense.amount)}</td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      </div>
     );
   }
 
   return (
-    <section>
-      <h2>Top expenses</h2>
+    <Card title="Top expenses" flush>
       {renderContent()}
-    </section>
+    </Card>
   );
 }
