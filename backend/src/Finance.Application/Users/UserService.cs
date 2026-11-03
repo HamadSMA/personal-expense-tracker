@@ -39,7 +39,29 @@ public class UserService(IFinanceDbContext db)
         };
 
         db.Users.Add(user);
-        await db.SaveChangesAsync(ct);
+
+        try
+        {
+            await db.SaveChangesAsync(ct);
+        }
+        catch (DbUpdateException)
+        {
+            // A parallel request for the same new user (e.g. the dashboard's first load fires
+            // several at once) inserted it first, so the unique index on ExternalIdentityId
+            // rejected ours. Stop tracking our failed insert so later saves in this request
+            // don't retry it, then use the row the other request created.
+            db.Users.Entry(user).State = EntityState.Detached;
+
+            var existingId = await db
+                .Users.Where(u => u.ExternalIdentityId == externalIdentityId)
+                .Select(u => u.Id)
+                .FirstOrDefaultAsync(ct);
+
+            if (existingId == Guid.Empty)
+                throw; // Failed for some other reason, so don't hide it.
+
+            return existingId;
+        }
 
         return user.Id;
     }
