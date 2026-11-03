@@ -22,4 +22,13 @@
     <ProjectReference Include="..\Finance.Infrastructure\Finance.Infrastructure.csproj" />
   </ItemGroup>
 
+  <!-- Lets the OpenAPI generator read XML doc comments from Finance.Application (e.g. query records). -->
+  <Target Name="AddApplicationXmlDocs" AfterTargets="ResolveReferences">
+    <ItemGroup>
+      <AdditionalFiles
+        Include="@(ReferencePath->'%(RootDir)%(Directory)%(Filename).xml')"
+        Condition="'%(ReferencePath.Filename)' == 'Finance.Application' And Exists('%(RootDir)%(Directory)%(Filename).xml')" />
+    </ItemGroup>
+  </Target>
+
 </Project>

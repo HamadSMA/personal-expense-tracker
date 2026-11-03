@@ -1,3 +1,5 @@
+using Finance.Api;
+using Finance.Application;
 using Finance.Infrastructure;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.IdentityModel.Tokens;
@@ -6,6 +8,9 @@ using Scalar.AspNetCore;
 var builder = WebApplication.CreateBuilder(args);
 
 // Add services to the container.
+
+// Application services (use cases)
+builder.Services.AddApplication();
 
 // Custom dependency for injecting DbContext
 builder.Services.AddInfrastructure(builder.Configuration);
@@ -27,6 +32,9 @@ builder
             ValidateIssuerSigningKey = true
         };
     });
+
+// Maps application exceptions (not found, validation) to ProblemDetails responses
+builder.Services.AddExceptionHandler<ApplicationExceptionHandler>();
 
 // Allows for the use of UseExceptionHandler for unhandled exceptions
 builder.Services.AddProblemDetails();
